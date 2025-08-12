@@ -43,6 +43,13 @@
     gap: 6px; 
     flex: 0 0 auto;
   }
+  /* Top performers row */
+  .top-row { 
+    display: flex; 
+    justify-content: space-between; 
+    gap: 6px; 
+    margin-bottom: 4px; 
+  }
   .metric-box { 
     background: #004080; 
     border: 1px solid #00aaff; 
@@ -123,9 +130,12 @@
     <select id="monthDropdown"></select>
   </div>
 
-  <div class="dashboard-row" id="topSok"></div>
-  <div class="dashboard-row" id="topProfit"></div>
-  <div class="dashboard-row" id="topCalls"></div>
+  <!-- New top performers row -->
+  <div class="top-row">
+    <div id="topSok" class="metric-box"></div>
+    <div id="topProfit" class="metric-box"></div>
+    <div id="topCalls" class="metric-box"></div>
+  </div>
 
   <div class="shift-container">
     <div class="shift-table">
@@ -139,7 +149,6 @@
   </div>
 
 <script>
-  // Your published Google Sheets CSV link
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
 
   const monthDropdown = document.getElementById('monthDropdown');
@@ -255,7 +264,7 @@
     function buildBox(title, key) {
       const sorted = Object.entries(data).map(([agent, v]) => ({ agent, value: v[key] || 0 }))
         .sort((a,b) => b.value - a.value).slice(0,3);
-      return `<div class="metric-box"><div class="title">Top by ${title}</div>` +
+      return `<div><div class="title">Top by ${title}</div>` +
              sorted.map(t => `<div class="agent">${t.agent}: ${key==="profitTotal" ? "¥" : ""}${Math.round(t.value)}</div>`).join("") +
              `</div>`;
     }
