@@ -254,6 +254,26 @@
     enableTableSort(container.querySelector("table"));
   }
 
+  function enableTableSort(table) {
+    const headers = table.querySelectorAll("th");
+    headers.forEach((th, idx) => {
+      th.addEventListener("click", () => {
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const totalRow = rows.pop();
+        const isNum = idx > 0;
+        rows.sort((a, b) => {
+          const aVal = a.children[idx].innerText.replace(/[¥,]/g,"");
+          const bVal = b.children[idx].innerText.replace(/[¥,]/g,"");
+          return isNum ? bVal - aVal : aVal.localeCompare(bVal);
+        });
+        tbody.innerHTML = "";
+        rows.forEach(r => tbody.appendChild(r));
+        tbody.appendChild(totalRow);
+      });
+    });
+  }
+
   function renderTopBoxes(data) {
     function buildBox(title, key) {
       const sorted = Object.entries(data).map(([agent, v]) => ({ agent, value: v[key] || 0 }))
@@ -271,25 +291,6 @@
     if (!sec) return "00:00";
     const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
     return h ? `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}` : `${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
-  }
-
-  function enableTableSort(table) {
-    const headers = table.querySelectorAll("th");
-    headers.forEach((th, idx) => {
-      th.addEventListener("click", () => {
-        const rows = Array.from(table.querySelectorAll("tbody tr")).slice(0, -1); // exclude last (Grand Total)
-        const isNum = idx > 0;
-        rows.sort((a, b) => {
-          const aVal = a.children[idx].innerText.replace(/[¥,]/g,"");
-          const bVal = b.children[idx].innerText.replace(/[¥,]/g,"");
-          return isNum ? bVal - aVal : aVal.localeCompare(bVal);
-        });
-        const tbody = table.querySelector("tbody");
-        tbody.innerHTML = "";
-        rows.forEach(r => tbody.appendChild(r));
-        tbody.appendChild(table.querySelector("tbody tr:last-child"));
-      });
-    });
   }
 
   loadData();
