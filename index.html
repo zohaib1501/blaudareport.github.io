@@ -19,10 +19,12 @@
   tbody td { padding: 5px 4px; text-align: center; border-bottom: 1px solid #004d80; }
   tbody tr:nth-child(odd) { background-color: #004080; }
   tbody tr:last-child { background-color: #005f9e; font-weight: bold; }
+  #lastUpdated { text-align: center; font-size: 11px; color: #cccccc; margin-top: 5px; }
 </style>
 </head>
 <body>
   <h2>Agent Dashboard - Compact View</h2>
+  <div id="lastUpdated"></div>
   <div style="text-align:center;">
     <select id="monthDropdown"></select>
   </div>
@@ -43,10 +45,7 @@
   </div>
 
 <script>
-  // Your Google Sheets CSV link
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
-  // Free public CORS proxy (avoids browser blocking local fetch)
-  const PROXY = "https://api.allorigins.win/raw?url=";
 
   const monthDropdown = document.getElementById('monthDropdown');
   const topSok = document.getElementById('topSok');
@@ -54,14 +53,17 @@
   const topCalls = document.getElementById('topCalls');
   const morningDiv = document.getElementById('morningTable');
   const nightDiv = document.getElementById('nightTable');
+  const lastUpdated = document.getElementById('lastUpdated');
 
   let allData = [], headers = [], currentMonth = "ALL";
 
   async function loadData() {
     try {
-      const response = await fetch(PROXY + encodeURIComponent(CSV_URL));
+      const response = await fetch(CSV_URL);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const text = await response.text();
       processCSV(text);
+      lastUpdated.textContent = "Last updated: " + new Date().toLocaleString();
     } catch (err) {
       console.error("Error loading CSV:", err);
     }
@@ -178,3 +180,4 @@
 </script>
 </body>
 </html>
+
