@@ -4,22 +4,116 @@
 <meta charset="UTF-8">
 <title>Agent Dashboard</title>
 <style>
-  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #001f3f; color: white; margin: 15px; user-select: none; font-size: 12px; }
-  h2 { text-align: center; color: #00aaff; margin-bottom: 10px; font-size: 20px; }
-  select { padding: 5px 10px; font-size: 12px; border-radius: 4px; border: 1px solid #00aaff; background: #002f5f; color: white; margin-bottom: 10px; }
-  .dashboard-row { display: flex; justify-content: space-between; margin-bottom: 10px; gap: 10px; }
-  .metric-box { background: #004080; border: 1px solid #00aaff; padding: 12px; border-radius: 8px; flex: 1; min-width: 180px; text-align: center; font-weight: bold; color: #a0e7ff; box-shadow: 0 0 10px #00aaff55; }
-  .metric-box .title { color: #00e5ff; margin-bottom: 5px; font-size: 14px; }
-  .metric-box .agent { font-size: 13px; margin: 2px 0; color: #ffffff; }
-  .shift-container { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-  .shift-table { background: #00264d; border-radius: 6px; padding: 10px; flex: 1; min-width: 45%; box-shadow: 0 0 10px #00aaff88; text-align: center; }
-  .shift-table h3 { margin: 6px 0 10px; font-size: 15px; color: #00c0ff; }
-  table { width: 100%; border-collapse: collapse; font-size: 11.5px; background: #003366; }
-  thead th { background: #005f9e; padding: 6px; font-size: 12px; color: white; cursor: pointer; }
-  tbody td { padding: 5px 4px; text-align: center; border-bottom: 1px solid #004d80; }
-  tbody tr:nth-child(odd) { background-color: #004080; }
-  tbody tr:last-child { background-color: #005f9e; font-weight: bold; }
-  #lastUpdated { text-align: center; font-size: 11px; color: #cccccc; margin-top: 5px; }
+  body { 
+    font-family: 'Segoe UI', Tahoma, sans-serif; 
+    background: #001f3f; 
+    color: white; 
+    margin: 0; 
+    user-select: none; 
+    font-size: 11px; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh; 
+  }
+  h2 { 
+    text-align: center; 
+    color: #00aaff; 
+    margin: 5px 0; 
+    font-size: 18px; 
+  }
+  #lastUpdated { 
+    text-align: center; 
+    font-size: 10px; 
+    color: #cccccc; 
+    margin: 2px 0; 
+  }
+  select { 
+    padding: 3px 6px; 
+    font-size: 11px; 
+    border-radius: 4px; 
+    border: 1px solid #00aaff; 
+    background: #002f5f; 
+    color: white; 
+    margin-bottom: 4px; 
+  }
+  .dashboard-row { 
+    display: flex; 
+    justify-content: space-between; 
+    margin-bottom: 4px; 
+    gap: 6px; 
+    flex: 0 0 auto;
+  }
+  .metric-box { 
+    background: #004080; 
+    border: 1px solid #00aaff; 
+    padding: 6px; 
+    border-radius: 6px; 
+    flex: 1; 
+    min-width: 120px; 
+    text-align: center; 
+    font-weight: bold; 
+    color: #a0e7ff; 
+    box-shadow: 0 0 6px #00aaff55; 
+  }
+  .metric-box .title { 
+    color: #00e5ff; 
+    margin-bottom: 3px; 
+    font-size: 12px; 
+  }
+  .metric-box .agent { 
+    font-size: 11px; 
+    margin: 1px 0; 
+    color: #ffffff; 
+  }
+  .shift-container { 
+    display: flex; 
+    justify-content: space-between; 
+    gap: 6px; 
+    flex: 1 1 auto; 
+    overflow: hidden; 
+  }
+  .shift-table { 
+    background: #00264d; 
+    border-radius: 6px; 
+    padding: 4px; 
+    flex: 1; 
+    min-width: 45%; 
+    box-shadow: 0 0 6px #00aaff88; 
+    text-align: center; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100%; 
+  }
+  .shift-table h3 { 
+    margin: 3px 0 4px; 
+    font-size: 13px; 
+    color: #00c0ff; 
+  }
+  table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    font-size: 10px; 
+    background: #003366; 
+    flex: 1 1 auto; 
+  }
+  thead th { 
+    background: #005f9e; 
+    padding: 3px; 
+    font-size: 10px; 
+    color: white; 
+  }
+  tbody td { 
+    padding: 3px 2px; 
+    text-align: center; 
+    border-bottom: 1px solid #004d80; 
+  }
+  tbody tr:nth-child(odd) { 
+    background-color: #004080; 
+  }
+  tbody tr:last-child { 
+    background-color: #005f9e; 
+    font-weight: bold; 
+  }
 </style>
 </head>
 <body>
@@ -36,15 +130,16 @@
   <div class="shift-container">
     <div class="shift-table">
       <h3>Morning Shift</h3>
-      <div id="morningTable"></div>
+      <div id="morningTable" style="flex: 1 1 auto; overflow: auto;"></div>
     </div>
     <div class="shift-table">
       <h3>Night Shift</h3>
-      <div id="nightTable"></div>
+      <div id="nightTable" style="flex: 1 1 auto; overflow: auto;"></div>
     </div>
   </div>
 
 <script>
+  // Your published Google Sheets CSV link
   const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
 
   const monthDropdown = document.getElementById('monthDropdown');
@@ -180,4 +275,3 @@
 </script>
 </body>
 </html>
-
