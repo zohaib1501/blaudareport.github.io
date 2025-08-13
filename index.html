@@ -9,10 +9,10 @@
   #lastUpdated { text-align: center; font-size: 10px; color: #cccccc; margin: 2px 0; }
   select { padding: 3px 6px; font-size: 11px; border-radius: 4px; border: 1px solid #00aaff; background: #002f5f; color: white; margin-bottom: 4px; }
   .top-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 8px; }
-  .metric-box { flex: 0 0 50%; background: linear-gradient(135deg, #0055aa, #0088ff); border: 2px solid #00e5ff; padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; color: white; box-shadow: 0 0 15px rgba(0, 229, 255, 0.8); animation: glow 2s infinite alternate; }
-  .metric-box .title { font-size: 18px; font-weight: bold; text-shadow: 0 0 5px #00e5ff, 0 0 10px #00e5ff; margin-bottom: 5px; }
-  .metric-box .agent { font-size: 16px; margin: 3px 0; text-shadow: 0 0 5px #ffffff, 0 0 10px #00e5ff; }
-  @keyframes glow { from { box-shadow: 0 0 10px rgba(0, 229, 255, 0.6), 0 0 20px rgba(0, 229, 255, 0.6); } to { box-shadow: 0 0 20px rgba(0, 229, 255, 1), 0 0 40px rgba(0, 229, 255, 1); } }
+  .metric-box { flex: 0 0 33%; background: linear-gradient(135deg, #ff0088, #ff66ff); border: 2px solid #ff33cc; padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; color: white; box-shadow: 0 0 15px rgba(255, 51, 204, 0.8); animation: glow 2s infinite alternate; }
+  .metric-box .title { font-size: 18px; font-weight: bold; text-shadow: 0 0 5px #ff33cc, 0 0 10px #ff33cc; margin-bottom: 5px; }
+  .metric-box .agent { font-size: 16px; margin: 3px 0; text-shadow: 0 0 5px #ffffff, 0 0 10px #ff33cc; }
+  @keyframes glow { from { box-shadow: 0 0 10px rgba(255, 51, 204, 0.6), 0 0 20px rgba(255, 51, 204, 0.6); } to { box-shadow: 0 0 20px rgba(255, 51, 204, 1), 0 0 40px rgba(255, 51, 204, 1); } }
   .shift-container { display: flex; justify-content: space-between; gap: 6px; flex: 1 1 auto; overflow: hidden; }
   .shift-table { background: #00264d; border-radius: 6px; padding: 4px; flex: 1; min-width: 45%; box-shadow: 0 0 6px #00aaff88; text-align: center; display: flex; flex-direction: column; height: 100%; }
   .shift-table h3 { margin: 3px 0 4px; font-size: 13px; color: #00c0ff; }
@@ -27,11 +27,19 @@
   <h2>Agent Dashboard - Compact View</h2>
   <div id="lastUpdated"></div>
   <div style="text-align:center;">
-    <select id="monthDropdown"></select>
+    <select id="monthDropdown" multiple></select>
+    <select id="quarterDropdown">
+      <option value="ALL">All Quarters</option>
+      <option value="Q1">Q1 (Oct, Nov, Dec)</option>
+      <option value="Q2">Q2 (Jan, Feb, Mar)</option>
+      <option value="Q3">Q3 (Apr, May, Jun)</option>
+      <option value="Q4">Q4 (Jul, Aug, Sep)</option>
+    </select>
   </div>
 
   <div class="top-row">
     <div id="topSok" class="metric-box"></div>
+    <div id="topProfit" class="metric-box"></div>
     <div id="topCalls" class="metric-box"></div>
   </div>
 
@@ -50,13 +58,15 @@
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
 
 const monthDropdown = document.getElementById('monthDropdown');
+const quarterDropdown = document.getElementById('quarterDropdown');
 const topSok = document.getElementById('topSok');
+const topProfit = document.getElementById('topProfit');
 const topCalls = document.getElementById('topCalls');
 const morningDiv = document.getElementById('morningTable');
 const nightDiv = document.getElementById('nightTable');
 const lastUpdated = document.getElementById('lastUpdated');
 
-let allData = [], headers = [], currentMonth = "ALL";
+let allData = [], headers = [], currentMonth = "ALL", currentQuarter = "ALL";
 
 async function loadData() {
   const response = await fetch(CSV_URL);
@@ -70,7 +80,7 @@ function processCSV(text) {
   headers = lines[0].map(h => h ? h.trim() : "");
   allData = lines.slice(1);
   populateMonths();
-  displayData(currentMonth);
+  displayData(currentMonth, currentQuarter);
 }
 
 function parseCSVLine(line) {
@@ -113,13 +123,19 @@ function populateMonths() {
   }).filter(Boolean)));
 
   const uniquePairs = monthPairs.map(str => JSON.parse(str));
-  monthDropdown.innerHTML = `<option value="ALL">All Months</option>` +
-    uniquePairs.map(p => `<option value="${p.raw}">${p.formatted}</option>`).join('');
-  monthDropdown.addEventListener("change", e => displayData(e.target.value));
+  monthDropdown.innerHTML = uniquePairs.map(p => `<option value="${p.raw}">${p.formatted}</option>`).join('');
+  monthDropdown.addEventListener("change", e => {
+    currentMonth = Array.from(e.target.selectedOptions).map(option => option.value);
+    displayData(currentMonth, currentQuarter);
+  });
+
+  quarterDropdown.addEventListener("change", e => {
+    currentQuarter = e.target.value;
+    displayData(currentMonth, currentQuarter);
+  });
 }
 
-function displayData(month) {
-  currentMonth = month;
+function displayData(months, quarter) {
   const i = {
     month: headers.indexOf("Month"),
     agent: headers.indexOf("Sales Agent"),
@@ -131,11 +147,16 @@ function displayData(month) {
     profit: headers.indexOf("Estimated SOK Profit")
   };
 
-  const data = month === "ALL" ? allData : allData.filter(r => r[i.month] === month);
-  const grouped = { morning: {}, night: {} };
-  const topData = {};
+  let filteredData = allData.filter(r => months.includes(r[i.month]));
+  if (quarter !== "ALL") {
+    const quarterMonths = getQuarterMonths(quarter);
+    filteredData = filteredData.filter(r => quarterMonths.includes(r[i.month]));
+  }
 
-  data.forEach(r => {
+  const grouped = { morning: {}, night: {} };
+  const topData = { sok: {}, profit: {}, calls: {} };
+
+  filteredData.forEach(r => {
     const agent = r[i.agent], shiftRaw = (r[i.shift] || "").toString().toLowerCase();
     const shift = shiftRaw.includes("morning") ? "morning" : "night";
     const sok = +r[i.sok] || 0, reserved = +r[i.reserved] || 0, calls = +r[i.calls] || 0, profit = +r[i.profit] || 0;
@@ -150,8 +171,14 @@ function displayData(month) {
     const g = grouped[shift][agent];
     g.sokTotal += sok; g.reservedTotal += reserved; g.callsTotal += calls; g.talkTotal += talk; g.profitTotal += profit;
 
-    if (!topData[agent]) topData[agent] = { sokTotal: 0, callsTotal: 0 };
-    topData[agent].sokTotal += sok; topData[agent].callsTotal += calls;
+    if (!topData.sok[agent]) topData.sok[agent] = { value: 0 };
+    topData.sok[agent].value += sok;
+
+    if (!topData.calls[agent]) topData.calls[agent] = { value: 0 };
+    topData.calls[agent].value += calls;
+
+    if (!topData.profit[agent]) topData.profit[agent] = { value: 0 };
+    topData.profit[agent].value += profit;
   });
 
   renderShift(Object.values(grouped.morning), morningDiv);
@@ -159,40 +186,25 @@ function displayData(month) {
   renderTopBoxes(topData);
 }
 
-function renderShift(data, container) {
-  const total = { sokTotal: 0, reservedTotal: 0, callsTotal: 0, talkTotal: 0, profitTotal: 0 };
-  data.forEach(d => { for (let k in total) total[k] += d[k]; });
-  data.push({ agent: "Grand Total", ...total });
-
-  const headersRow = ["Sales Agent", "SOK Count", "Reserved Count", "Total Calls", "Total Talktime", "Estimated SOK Profit"];
-  let html = "<table><thead><tr>" + headersRow.map(h => `<th>${h}</th>`).join('') + "</tr></thead><tbody>";
-
-  data.forEach(d => {
-    html += `<tr>
-      <td data-value="${d.agent}">${d.agent}</td>
-      <td data-value="${d.sokTotal}">${d.sokTotal}</td>
-      <td data-value="${d.reservedTotal}">${d.reservedTotal}</td>
-      <td data-value="${d.callsTotal}">${d.callsTotal}</td>
-      <td data-value="${d.talkTotal}">${formatTime(d.talkTotal)}</td>
-      <td data-value="${Math.round(d.profitTotal)}">¥${Math.round(d.profitTotal)}</td>
-    </tr>`;
-  });
-
-  html += "</tbody></table>";
-  container.innerHTML = html;
-  enableSorting(container);
+function getQuarterMonths(quarter) {
+  if (quarter === "Q1") return ["Oct", "Nov", "Dec"];
+  if (quarter === "Q2") return ["Jan", "Feb", "Mar"];
+  if (quarter === "Q3") return ["Apr", "May", "Jun"];
+  if (quarter === "Q4") return ["Jul", "Aug", "Sep"];
+  return [];
 }
 
 function renderTopBoxes(data) {
   function buildBox(title, key) {
-    const sorted = Object.entries(data).map(([agent, v]) => ({ agent, value: v[key] || 0 }))
+    const sorted = Object.entries(data[key]).map(([agent, v]) => ({ agent, value: v.value }))
       .sort((a,b) => b.value - a.value).slice(0,3);
-    return `<div><div class="title">Top by ${title}</div>` +
+    return `<div><div class="title">${title}</div>` +
            sorted.map(t => `<div class="agent">${t.agent}: ${Math.round(t.value)}</div>`).join("") +
            `</div>`;
   }
-  topSok.innerHTML = buildBox("SOK", "sokTotal");
-  topCalls.innerHTML = buildBox("Calls", "callsTotal");
+  topSok.innerHTML = buildBox("Highest SOK - Top 3", "sok");
+  topProfit.innerHTML = buildBox("Highest Profit - Top 3", "profit");
+  topCalls.innerHTML = buildBox("Highest Calls - Top 3", "calls");
 }
 
 function enableSorting(container) {
