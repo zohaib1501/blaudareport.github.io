@@ -189,7 +189,31 @@ function populateMonths() {
   const monthIndex = headers.indexOf("Month");
   const months = Array.from(new Set(allData.map(row => row[monthIndex])));
   
-  const monthsFormatted = months.map(m => {
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthsFormatted = Array.from(new Set(months.map(m => {
+    if (!m) return m;
+    let dateObj;
+    if (!isNaN(Date.parse(m))) {
+      dateObj = new Date(m);
+    } else {
+      // Try parsing manually
+      const parts = m.split(/[-\/]/);
+      if (parts.length >= 3) {
+        const day = parseInt(parts[0], 10);
+        const monthIndex = isNaN(parts[1]) ? monthNames.findIndex(n => n.toLowerCase() === parts[1].slice(0,3).toLowerCase()) : parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        dateObj = new Date(year, monthIndex, day);
+      } else if (parts.length === 2) {
+        const monthIndex = isNaN(parts[0]) ? monthNames.findIndex(n => n.toLowerCase() === parts[0].slice(0,3).toLowerCase()) : parseInt(parts[0], 10) - 1;
+        const year = parseInt(parts[1], 10);
+        dateObj = new Date(year, monthIndex, 1);
+      }
+    }
+    if (dateObj && !isNaN(dateObj)) {
+      return monthNames[dateObj.getMonth()] + '-' + dateObj.getFullYear().toString().slice(2);
+    }
+    return m;
+  })));
     if (!m) return m;
     const parts = m.split(/[-\/]/);
     if (parts.length >= 2) {
