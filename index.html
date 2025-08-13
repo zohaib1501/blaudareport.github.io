@@ -4,121 +4,23 @@
 <meta charset="UTF-8">
 <title>Agent Dashboard</title>
 <style>
-  body { 
-    font-family: 'Segoe UI', Tahoma, sans-serif; 
-    background: #001f3f; 
-    color: white; 
-    margin: 0; 
-    user-select: none; 
-    font-size: 11px; 
-    display: flex; 
-    flex-direction: column; 
-    height: 100vh; 
-  }
-  h2 { 
-    text-align: center; 
-    color: #00aaff; 
-    margin: 5px 0; 
-    font-size: 18px; 
-  }
-  #lastUpdated { 
-    text-align: center; 
-    font-size: 11px; 
-    color: #cccccc; 
-    margin: 2px 0; 
-  }
-  select { 
-    padding: 3px 6px; 
-    font-size: 11px; 
-    border-radius: 4px; 
-    border: 1px solid #00aaff; 
-    background: #002f5f; 
-    color: white; 
-    margin-bottom: 4px; 
-  }
-  .top-row { 
-    display: flex; 
-    justify-content: center; 
-    gap: 10px; 
-    margin-bottom: 8px; 
-  }
-  .metric-box { 
-    flex: 0 0 50%; 
-    background: linear-gradient(135deg, #0055aa, #0088ff);
-    border: 2px solid #00e5ff; 
-    padding: 10px; 
-    border-radius: 10px; 
-    text-align: center; 
-    font-weight: bold; 
-    color: white; 
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.8);
-    animation: glow 2s infinite alternate;
-  }
-  .metric-box .title { 
-    font-size: 18px; 
-    font-weight: bold; 
-    text-shadow: 0 0 5px #00e5ff, 0 0 10px #00e5ff;
-    margin-bottom: 5px;
-  }
-  .metric-box .agent { 
-    font-size: 16px; 
-    margin: 3px 0; 
-    text-shadow: 0 0 5px #ffffff, 0 0 10px #00e5ff;
-  }
-  @keyframes glow {
-    from { box-shadow: 0 0 10px rgba(0, 229, 255, 0.6), 0 0 20px rgba(0, 229, 255, 0.6); }
-    to { box-shadow: 0 0 20px rgba(0, 229, 255, 1), 0 0 40px rgba(0, 229, 255, 1); }
-  }
-  .shift-container { 
-    display: flex; 
-    justify-content: space-between; 
-    gap: 6px; 
-    flex: 1 1 auto; 
-    overflow: hidden; 
-  }
-  .shift-table { 
-    background: #00264d; 
-    border-radius: 6px; 
-    padding: 4px; 
-    flex: 1; 
-    min-width: 45%; 
-    box-shadow: 0 0 6px #00aaff88; 
-    text-align: center; 
-    display: flex; 
-    flex-direction: column; 
-    height: 100%; 
-  }
-  .shift-table h3 { 
-    margin: 3px 0 4px; 
-    font-size: 13px; 
-    color: #00c0ff; 
-  }
-  table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    font-size: 11px; 
-    background: #003366; 
-    flex: 1 1 auto; 
-  }
-  thead th { 
-    background: #005f9e; 
-    padding: 3px; 
-    font-size: 11px; 
-    color: white; 
-    cursor: pointer;
-  }
-  tbody td { 
-    padding: 3px 2px; 
-    text-align: center; 
-    border-bottom: 1px solid #004d80; 
-  }
-  tbody tr:nth-child(odd) { 
-    background-color: #004080; 
-  }
-  tbody tr:last-child { 
-    background-color: #005f9e; 
-    font-weight: bold; 
-  }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #001f3f; color: white; margin: 0; user-select: none; font-size: 11px; display: flex; flex-direction: column; height: 100vh; }
+  h2 { text-align: center; color: #00aaff; margin: 5px 0; font-size: 18px; }
+  #lastUpdated { text-align: center; font-size: 10px; color: #cccccc; margin: 2px 0; }
+  select { padding: 3px 6px; font-size: 11px; border-radius: 4px; border: 1px solid #00aaff; background: #002f5f; color: white; margin-bottom: 4px; }
+  .top-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 8px; }
+  .metric-box { flex: 0 0 50%; background: linear-gradient(135deg, #0055aa, #0088ff); border: 2px solid #00e5ff; padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; color: white; box-shadow: 0 0 15px rgba(0, 229, 255, 0.8); animation: glow 2s infinite alternate; }
+  .metric-box .title { font-size: 18px; font-weight: bold; text-shadow: 0 0 5px #00e5ff, 0 0 10px #00e5ff; margin-bottom: 5px; }
+  .metric-box .agent { font-size: 16px; margin: 3px 0; text-shadow: 0 0 5px #ffffff, 0 0 10px #00e5ff; }
+  @keyframes glow { from { box-shadow: 0 0 10px rgba(0, 229, 255, 0.6), 0 0 20px rgba(0, 229, 255, 0.6); } to { box-shadow: 0 0 20px rgba(0, 229, 255, 1), 0 0 40px rgba(0, 229, 255, 1); } }
+  .shift-container { display: flex; justify-content: space-between; gap: 6px; flex: 1 1 auto; overflow: hidden; }
+  .shift-table { background: #00264d; border-radius: 6px; padding: 4px; flex: 1; min-width: 45%; box-shadow: 0 0 6px #00aaff88; text-align: center; display: flex; flex-direction: column; height: 100%; }
+  .shift-table h3 { margin: 3px 0 4px; font-size: 13px; color: #00c0ff; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; background: #003366; flex: 1 1 auto; }
+  thead th { background: #005f9e; padding: 3px; font-size: 11px; color: white; cursor: pointer; }
+  tbody td { padding: 3px 2px; text-align: center; border-bottom: 1px solid #004d80; }
+  tbody tr:nth-child(odd) { background-color: #004080; }
+  tbody tr:last-child { background-color: #005f9e; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -187,52 +89,32 @@ function parseCSVLine(line) {
 
 function populateMonths() {
   const monthIndex = headers.indexOf("Month");
-  const months = Array.from(new Set(allData.map(row => row[monthIndex])));
-  
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const monthsFormatted = Array.from(new Set(months.map(m => {
-    if (!m) return m;
+  const monthPairs = Array.from(new Set(allData.map(row => {
+    const raw = row[monthIndex];
+    if (!raw) return null;
     let dateObj;
-    if (!isNaN(Date.parse(m))) {
-      dateObj = new Date(m);
+    if (!isNaN(Date.parse(raw))) {
+      dateObj = new Date(raw);
     } else {
-      // Try parsing manually
-      const parts = m.split(/[-\/]/);
+      const parts = raw.split(/[-\\/]/);
       if (parts.length >= 3) {
         const day = parseInt(parts[0], 10);
-        const monthIndex = isNaN(parts[1]) ? monthNames.findIndex(n => n.toLowerCase() === parts[1].slice(0,3).toLowerCase()) : parseInt(parts[1], 10) - 1;
+        const monthIdx = isNaN(parts[1]) ? monthNames.findIndex(n => n.toLowerCase() === parts[1].slice(0,3).toLowerCase()) : parseInt(parts[1], 10) - 1;
         const year = parseInt(parts[2], 10);
-        dateObj = new Date(year, monthIndex, day);
-      } else if (parts.length === 2) {
-        const monthIndex = isNaN(parts[0]) ? monthNames.findIndex(n => n.toLowerCase() === parts[0].slice(0,3).toLowerCase()) : parseInt(parts[0], 10) - 1;
-        const year = parseInt(parts[1], 10);
-        dateObj = new Date(year, monthIndex, 1);
+        dateObj = new Date(year, monthIdx, day);
       }
     }
     if (dateObj && !isNaN(dateObj)) {
-      return monthNames[dateObj.getMonth()] + '-' + dateObj.getFullYear().toString().slice(2);
+      const formatted = monthNames[dateObj.getMonth()] + '-' + dateObj.getFullYear().toString().slice(2);
+      return JSON.stringify({ raw: raw, formatted: formatted });
     }
-    return m;
-  })));
-    if (!m) return m;
-    const parts = m.split(/[-\/]/);
-    if (parts.length >= 2) {
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      let monthIndex, year;
-      if (isNaN(parts[0])) { // month name first
-        monthIndex = monthNames.findIndex(n => n.toLowerCase() === parts[0].slice(0,3).toLowerCase());
-        year = parts[1];
-      } else { // numeric month first
-        monthIndex = parseInt(parts[0], 10) - 1;
-        year = parts[1];
-      }
-      if (year.length === 4) year = year.slice(2);
-      return monthNames[monthIndex] + '-' + year;
-    }
-    return m;
-  });
+    return null;
+  }).filter(Boolean)));
 
-  monthDropdown.innerHTML = `<option value="ALL">All Months</option>` + monthsFormatted.map(m => `<option value="${m}">${m}</option>`).join('');
+  const uniquePairs = monthPairs.map(str => JSON.parse(str));
+  monthDropdown.innerHTML = `<option value="ALL">All Months</option>` +
+    uniquePairs.map(p => `<option value="${p.raw}">${p.formatted}</option>`).join('');
   monthDropdown.addEventListener("change", e => displayData(e.target.value));
 }
 
@@ -313,13 +195,6 @@ function renderTopBoxes(data) {
   topCalls.innerHTML = buildBox("Calls", "callsTotal");
 }
 
-function formatTime(sec) {
-  if (!sec) return "00:00";
-  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
-  return h ? `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}` : `${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
-}
-
-
 function enableSorting(container) {
   const table = container.querySelector("table");
   if (!table) return;
@@ -347,6 +222,12 @@ function enableSorting(container) {
       asc = !asc;
     };
   });
+}
+
+function formatTime(sec) {
+  if (!sec) return "00:00";
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return h ? `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}` : `${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
 }
 
 loadData();
