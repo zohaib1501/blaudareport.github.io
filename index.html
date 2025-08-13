@@ -24,15 +24,15 @@
 </style>
 </head>
 <body>
-  <h2>Agent Dashboard - Result Page</h2>
+  <h2>Agent Dashboard - Compact View</h2>
   <div id="lastUpdated"></div>
   <div style="text-align:center;">
     <select id="monthDropdown"></select>
   </div>
 
   <div class="top-row">
-    <div id="Highest SOK - Top3" class="metric-box"></div>
-    <div id="Highest Profit - Top3" class="metric-box"></div>
+    <div id="topSok" class="metric-box"></div>
+    <div id="topCalls" class="metric-box"></div>
   </div>
 
   <div class="shift-container">
@@ -113,8 +113,8 @@ function populateMonths() {
   }).filter(Boolean)));
 
   const uniquePairs = monthPairs.map(str => JSON.parse(str));
-  monthDropdown.innerHTML = <option value="ALL">All Months</option> +
-    uniquePairs.map(p => <option value="${p.raw}">${p.formatted}</option>).join('');
+  monthDropdown.innerHTML = `<option value="ALL">All Months</option>` +
+    uniquePairs.map(p => `<option value="${p.raw}">${p.formatted}</option>`).join('');
   monthDropdown.addEventListener("change", e => displayData(e.target.value));
 }
 
@@ -165,17 +165,17 @@ function renderShift(data, container) {
   data.push({ agent: "Grand Total", ...total });
 
   const headersRow = ["Sales Agent", "SOK Count", "Reserved Count", "Total Calls", "Total Talktime", "Estimated SOK Profit"];
-  let html = "<table><thead><tr>" + headersRow.map(h => <th>${h}</th>).join('') + "</tr></thead><tbody>";
+  let html = "<table><thead><tr>" + headersRow.map(h => `<th>${h}</th>`).join('') + "</tr></thead><tbody>";
 
   data.forEach(d => {
-    html += <tr>
+    html += `<tr>
       <td data-value="${d.agent}">${d.agent}</td>
       <td data-value="${d.sokTotal}">${d.sokTotal}</td>
       <td data-value="${d.reservedTotal}">${d.reservedTotal}</td>
       <td data-value="${d.callsTotal}">${d.callsTotal}</td>
       <td data-value="${d.talkTotal}">${formatTime(d.talkTotal)}</td>
       <td data-value="${Math.round(d.profitTotal)}">¥${Math.round(d.profitTotal)}</td>
-    </tr>;
+    </tr>`;
   });
 
   html += "</tbody></table>";
@@ -187,9 +187,9 @@ function renderTopBoxes(data) {
   function buildBox(title, key) {
     const sorted = Object.entries(data).map(([agent, v]) => ({ agent, value: v[key] || 0 }))
       .sort((a,b) => b.value - a.value).slice(0,3);
-    return <div><div class="title">Top by ${title}</div> +
-           sorted.map(t => <div class="agent">${t.agent}: ${Math.round(t.value)}</div>).join("") +
-           </div>;
+    return `<div><div class="title">Top by ${title}</div>` +
+           sorted.map(t => `<div class="agent">${t.agent}: ${Math.round(t.value)}</div>`).join("") +
+           `</div>`;
   }
   topSok.innerHTML = buildBox("SOK", "sokTotal");
   topCalls.innerHTML = buildBox("Calls", "callsTotal");
@@ -227,7 +227,7 @@ function enableSorting(container) {
 function formatTime(sec) {
   if (!sec) return "00:00";
   const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
-  return h ? ${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")} : ${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")};
+  return h ? `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}` : `${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
 }
 
 loadData();
