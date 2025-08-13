@@ -23,7 +23,7 @@
   }
   #lastUpdated { 
     text-align: center; 
-    font-size: 10px; 
+    font-size: 11px; 
     color: #cccccc; 
     margin: 2px 0; 
   }
@@ -96,14 +96,14 @@
   table { 
     width: 100%; 
     border-collapse: collapse; 
-    font-size: 10px; 
+    font-size: 11px; 
     background: #003366; 
     flex: 1 1 auto; 
   }
   thead th { 
     background: #005f9e; 
     padding: 3px; 
-    font-size: 10px; 
+    font-size: 11px; 
     color: white; 
     cursor: pointer;
   }
@@ -188,7 +188,27 @@ function parseCSVLine(line) {
 function populateMonths() {
   const monthIndex = headers.indexOf("Month");
   const months = Array.from(new Set(allData.map(row => row[monthIndex])));
-  monthDropdown.innerHTML = `<option value="ALL">All Months</option>` + months.map(m => `<option value="${m}">${m}</option>`).join('');
+  
+  const monthsFormatted = months.map(m => {
+    if (!m) return m;
+    const parts = m.split(/[-\/]/);
+    if (parts.length >= 2) {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      let monthIndex, year;
+      if (isNaN(parts[0])) { // month name first
+        monthIndex = monthNames.findIndex(n => n.toLowerCase() === parts[0].slice(0,3).toLowerCase());
+        year = parts[1];
+      } else { // numeric month first
+        monthIndex = parseInt(parts[0], 10) - 1;
+        year = parts[1];
+      }
+      if (year.length === 4) year = year.slice(2);
+      return monthNames[monthIndex] + '-' + year;
+    }
+    return m;
+  });
+
+  monthDropdown.innerHTML = `<option value="ALL">All Months</option>` + monthsFormatted.map(m => `<option value="${m}">${m}</option>`).join('');
   monthDropdown.addEventListener("change", e => displayData(e.target.value));
 }
 
@@ -254,6 +274,7 @@ function renderShift(data, container) {
 
   html += "</tbody></table>";
   container.innerHTML = html;
+  enableSorting(container);
 }
 
 function renderTopBoxes(data) {
@@ -272,6 +293,36 @@ function formatTime(sec) {
   if (!sec) return "00:00";
   const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
   return h ? `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}` : `${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+}
+
+
+function enableSorting(container) {
+  const table = container.querySelector("table");
+  if (!table) return;
+  const tbody = table.querySelector("tbody");
+  const headers = table.querySelectorAll("th");
+  headers.forEach((th, idx) => {
+    let asc = true;
+    th.onclick = () => {
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const totalRow = rows.pop();
+      rows.sort((a, b) => {
+        const aVal = a.cells[idx].dataset.value || a.cells[idx].innerText;
+        const bVal = b.cells[idx].dataset.value || b.cells[idx].innerText;
+        const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ""));
+        const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ""));
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          return asc ? aNum - bNum : bNum - aNum;
+        } else {
+          return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        }
+      });
+      tbody.innerHTML = "";
+      rows.forEach(r => tbody.appendChild(r));
+      tbody.appendChild(totalRow);
+      asc = !asc;
+    };
+  });
 }
 
 loadData();
