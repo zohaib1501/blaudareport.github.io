@@ -1,49 +1,39 @@
+Skip to content
+You said:
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Agent Dashboard</title>
 <style>
-  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0d1f2d; color: white; margin: 0; user-select: none; font-size: 11px; display: flex; flex-direction: column; height: 100vh; }
-  h2 { text-align: center; color: #62b6f3; margin: 5px 0; font-size: 18px; }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #001f3f; color: white; margin: 0; user-select: none; font-size: 11px; display: flex; flex-direction: column; height: 100vh; }
+  h2 { text-align: center; color: #00aaff; margin: 5px 0; font-size: 18px; }
   #lastUpdated { text-align: center; font-size: 10px; color: #cccccc; margin: 2px 0; }
-  select { padding: 3px 6px; font-size: 11px; border-radius: 4px; border: 1px solid #62b6f3; background: #1f2e44; color: white; margin-bottom: 4px; }
+  select { padding: 3px 6px; font-size: 11px; border-radius: 4px; border: 1px solid #00aaff; background: #002f5f; color: white; margin-bottom: 4px; }
   .top-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 8px; }
-  .metric-box { flex: 0 0 33%; background: linear-gradient(135deg, #4e9eff, #62b6f3); border: 2px solid #3a8dff; padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; color: white; box-shadow: 0 0 15px rgba(68, 124, 190, 0.7); animation: glow 2s infinite alternate; }
-  .metric-box .title { font-size: 18px; font-weight: bold; text-shadow: 0 0 5px #3a8dff, 0 0 10px #3a8dff; margin-bottom: 5px; }
-  .metric-box .agent { font-size: 16px; margin: 3px 0; text-shadow: 0 0 5px #ffffff, 0 0 10px #62b6f3; }
-  @keyframes glow { from { box-shadow: 0 0 10px rgba(68, 124, 190, 0.6), 0 0 20px rgba(68, 124, 190, 0.6); } to { box-shadow: 0 0 20px rgba(68, 124, 190, 1), 0 0 40px rgba(68, 124, 190, 1); } }
+  .metric-box { flex: 0 0 50%; background: linear-gradient(135deg, #0055aa, #0088ff); border: 2px solid #00e5ff; padding: 10px; border-radius: 10px; text-align: center; font-weight: bold; color: white; box-shadow: 0 0 15px rgba(0, 229, 255, 0.8); animation: glow 2s infinite alternate; }
+  .metric-box .title { font-size: 18px; font-weight: bold; text-shadow: 0 0 5px #00e5ff, 0 0 10px #00e5ff; margin-bottom: 5px; }
+  .metric-box .agent { font-size: 16px; margin: 3px 0; text-shadow: 0 0 5px #ffffff, 0 0 10px #00e5ff; }
+  @keyframes glow { from { box-shadow: 0 0 10px rgba(0, 229, 255, 0.6), 0 0 20px rgba(0, 229, 255, 0.6); } to { box-shadow: 0 0 20px rgba(0, 229, 255, 1), 0 0 40px rgba(0, 229, 255, 1); } }
   .shift-container { display: flex; justify-content: space-between; gap: 6px; flex: 1 1 auto; overflow: hidden; }
-  .shift-table { background: #1e2a3b; border-radius: 6px; padding: 4px; flex: 1; min-width: 45%; box-shadow: 0 0 6px #62b6f388; text-align: center; display: flex; flex-direction: column; height: 100%; }
-  .shift-table h3 { margin: 3px 0 4px; font-size: 13px; color: #62b6f3; }
-  table { width: 100%; border-collapse: collapse; font-size: 11px; background: #243244; flex: 1 1 auto; }
-  thead th { background: #3a5a7b; padding: 3px; font-size: 11px; color: white; cursor: pointer; }
-  tbody td { padding: 3px 2px; text-align: center; border-bottom: 1px solid #2d4552; }
-  tbody tr:nth-child(odd) { background-color: #2e3d54; }
-  tbody tr:last-child { background-color: #3a5a7b; font-weight: bold; }
+  .shift-table { background: #00264d; border-radius: 6px; padding: 4px; flex: 1; min-width: 45%; box-shadow: 0 0 6px #00aaff88; text-align: center; display: flex; flex-direction: column; height: 100%; }
+  .shift-table h3 { margin: 3px 0 4px; font-size: 13px; color: #00c0ff; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; background: #003366; flex: 1 1 auto; }
+  thead th { background: #005f9e; padding: 3px; font-size: 11px; color: white; cursor: pointer; }
+  tbody td { padding: 3px 2px; text-align: center; border-bottom: 1px solid #004d80; }
+  tbody tr:nth-child(odd) { background-color: #004080; }
+  tbody tr:last-child { background-color: #005f9e; font-weight: bold; }
 </style>
 </head>
 <body>
   <h2>Agent Dashboard - Compact View</h2>
   <div id="lastUpdated"></div>
   <div style="text-align:center;">
-    <div id="monthSelection">
-      <label><input type="checkbox" id="selectAllMonths"> All Months</label>
-      <br>
-      <div id="monthCheckboxes"></div>
-    </div>
-    <select id="quarterDropdown">
-      <option value="ALL">All Quarters</option>
-      <option value="Q1">Q1 (Oct, Nov, Dec)</option>
-      <option value="Q2">Q2 (Jan, Feb, Mar)</option>
-      <option value="Q3">Q3 (Apr, May, Jun)</option>
-      <option value="Q4">Q4 (Jul, Aug, Sep)</option>
-    </select>
+    <select id="monthDropdown"></select>
   </div>
 
   <div class="top-row">
     <div id="topSok" class="metric-box"></div>
-    <div id="topProfit" class="metric-box"></div>
     <div id="topCalls" class="metric-box"></div>
   </div>
 
@@ -61,18 +51,14 @@
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
 
-const monthSelection = document.getElementById('monthSelection');
-const monthCheckboxes = document.getElementById('monthCheckboxes');
-const quarterDropdown = document.getElementById('quarterDropdown');
+const monthDropdown = document.getElementById('monthDropdown');
 const topSok = document.getElementById('topSok');
-const topProfit = document.getElementById('topProfit');
 const topCalls = document.getElementById('topCalls');
 const morningDiv = document.getElementById('morningTable');
 const nightDiv = document.getElementById('nightTable');
 const lastUpdated = document.getElementById('lastUpdated');
-const selectAllMonthsCheckbox = document.getElementById('selectAllMonths');
 
-let allData = [], headers = [], currentMonths = [], currentQuarter = "ALL";
+let allData = [], headers = [], currentMonth = "ALL";
 
 async function loadData() {
   const response = await fetch(CSV_URL);
@@ -86,7 +72,7 @@ function processCSV(text) {
   headers = lines[0].map(h => h ? h.trim() : "");
   allData = lines.slice(1);
   populateMonths();
-  displayData(currentMonths, currentQuarter);
+  displayData(currentMonth);
 }
 
 function parseCSVLine(line) {
@@ -129,70 +115,125 @@ function populateMonths() {
   }).filter(Boolean)));
 
   const uniquePairs = monthPairs.map(str => JSON.parse(str));
-  monthCheckboxes.innerHTML = uniquePairs.map(p => `
-    <label>
-      <input type="checkbox" class="monthCheckbox" value="${p.raw}"> ${p.formatted}
-    </label><br>
-  `).join('');
-
-  // All months selection checkbox
-  selectAllMonthsCheckbox.addEventListener("change", function() {
-    const checkboxes = document.querySelectorAll('.monthCheckbox');
-    checkboxes.forEach(checkbox => checkbox.checked = selectAllMonthsCheckbox.checked);
-    currentMonths = selectAllMonthsCheckbox.checked ? uniquePairs.map(p => p.raw) : [];
-    displayData(currentMonths, currentQuarter);
-  });
-
-  const checkboxes = document.querySelectorAll('.monthCheckbox');
-  checkboxes.forEach(checkbox => checkbox.addEventListener('change', function() {
-    currentMonths = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
-    displayData(currentMonths, currentQuarter);
-  }));
+  monthDropdown.innerHTML = <option value="ALL">All Months</option> +
+    uniquePairs.map(p => <option value="${p.raw}">${p.formatted}</option>).join('');
+  monthDropdown.addEventListener("change", e => displayData(e.target.value));
 }
 
-function displayData(months, quarter) {
-  // Filter data by selected months and quarter
-  let filteredData = allData.filter(row => {
-    const month = row[headers.indexOf('Month')];
-    const matchesMonth = months.length === 0 || months.includes(month);
-    const matchesQuarter = quarter === "ALL" || (quarter === "Q1" && ["Oct", "Nov", "Dec"].includes(month)) ||
-      (quarter === "Q2" && ["Jan", "Feb", "Mar"].includes(month)) ||
-      (quarter === "Q3" && ["Apr", "May", "Jun"].includes(month)) ||
-      (quarter === "Q4" && ["Jul", "Aug", "Sep"].includes(month));
-    return matchesMonth && matchesQuarter;
+function displayData(month) {
+  currentMonth = month;
+  const i = {
+    month: headers.indexOf("Month"),
+    agent: headers.indexOf("Sales Agent"),
+    shift: headers.indexOf("Shift"),
+    sok: headers.indexOf("SOK Count"),
+    reserved: headers.indexOf("Reserved Count"),
+    calls: headers.indexOf("Total Calls"),
+    talk: headers.indexOf("Total Talktime"),
+    profit: headers.indexOf("Estimated SOK Profit")
+  };
+
+  const data = month === "ALL" ? allData : allData.filter(r => r[i.month] === month);
+  const grouped = { morning: {}, night: {} };
+  const topData = {};
+
+  data.forEach(r => {
+    const agent = r[i.agent], shiftRaw = (r[i.shift] || "").toString().toLowerCase();
+    const shift = shiftRaw.includes("morning") ? "morning" : "night";
+    const sok = +r[i.sok] || 0, reserved = +r[i.reserved] || 0, calls = +r[i.calls] || 0, profit = +r[i.profit] || 0;
+    let talk = 0;
+    const talkRaw = (r[i.talk] || "").toString();
+    if (talkRaw.includes(":")) {
+      const t = talkRaw.split(":").map(Number);
+      talk = t.length === 3 ? t[0]*3600 + t[1]*60 + t[2] : t[0]*60 + t[1];
+    } else talk = +talkRaw || 0;
+
+    if (!grouped[shift][agent]) grouped[shift][agent] = { agent, sokTotal: 0, reservedTotal: 0, callsTotal: 0, talkTotal: 0, profitTotal: 0 };
+    const g = grouped[shift][agent];
+    g.sokTotal += sok; g.reservedTotal += reserved; g.callsTotal += calls; g.talkTotal += talk; g.profitTotal += profit;
+
+    if (!topData[agent]) topData[agent] = { sokTotal: 0, callsTotal: 0 };
+    topData[agent].sokTotal += sok; topData[agent].callsTotal += calls;
   });
 
-  // Display filtered data in the tables
-  updateTable(filteredData, 'Morning');
-  updateTable(filteredData, 'Night');
+  renderShift(Object.values(grouped.morning), morningDiv);
+  renderShift(Object.values(grouped.night), nightDiv);
+  renderTopBoxes(topData);
 }
 
-function updateTable(filteredData, shift) {
-  const tableDiv = shift === 'Morning' ? morningDiv : nightDiv;
-  const shiftData = filteredData.filter(row => row[headers.indexOf('Shift')] === shift);
-  let tableHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>Agent</th>
-          <th>Task</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${shiftData.map(row => `
-          <tr>
-            <td>${row[headers.indexOf('Agent')]}</td>
-            <td>${row[headers.indexOf('Task')]}</td>
-            <td>${row[headers.indexOf('Time')]}</td>
-          </tr>`).join('')}
-      </tbody>
-    </table>
-  `;
-  tableDiv.innerHTML = tableHTML;
+function renderShift(data, container) {
+  const total = { sokTotal: 0, reservedTotal: 0, callsTotal: 0, talkTotal: 0, profitTotal: 0 };
+  data.forEach(d => { for (let k in total) total[k] += d[k]; });
+  data.push({ agent: "Grand Total", ...total });
+
+  const headersRow = ["Sales Agent", "SOK Count", "Reserved Count", "Total Calls", "Total Talktime", "Estimated SOK Profit"];
+  let html = "<table><thead><tr>" + headersRow.map(h => <th>${h}</th>).join('') + "</tr></thead><tbody>";
+
+  data.forEach(d => {
+    html += <tr>
+      <td data-value="${d.agent}">${d.agent}</td>
+      <td data-value="${d.sokTotal}">${d.sokTotal}</td>
+      <td data-value="${d.reservedTotal}">${d.reservedTotal}</td>
+      <td data-value="${d.callsTotal}">${d.callsTotal}</td>
+      <td data-value="${d.talkTotal}">${formatTime(d.talkTotal)}</td>
+      <td data-value="${Math.round(d.profitTotal)}">¥${Math.round(d.profitTotal)}</td>
+    </tr>;
+  });
+
+  html += "</tbody></table>";
+  container.innerHTML = html;
+  enableSorting(container);
+}
+
+function renderTopBoxes(data) {
+  function buildBox(title, key) {
+    const sorted = Object.entries(data).map(([agent, v]) => ({ agent, value: v[key] || 0 }))
+      .sort((a,b) => b.value - a.value).slice(0,3);
+    return <div><div class="title">Top by ${title}</div> +
+           sorted.map(t => <div class="agent">${t.agent}: ${Math.round(t.value)}</div>).join("") +
+           </div>;
+  }
+  topSok.innerHTML = buildBox("SOK", "sokTotal");
+  topCalls.innerHTML = buildBox("Calls", "callsTotal");
+}
+
+function enableSorting(container) {
+  const table = container.querySelector("table");
+  if (!table) return;
+  const tbody = table.querySelector("tbody");
+  const headers = table.querySelectorAll("th");
+  headers.forEach((th, idx) => {
+    let asc = true;
+    th.onclick = () => {
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+      const totalRow = rows.pop();
+      rows.sort((a, b) => {
+        const aVal = a.cells[idx].dataset.value || a.cells[idx].innerText;
+        const bVal = b.cells[idx].dataset.value || b.cells[idx].innerText;
+        const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ""));
+        const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ""));
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          return asc ? aNum - bNum : bNum - aNum;
+        } else {
+          return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        }
+      });
+      tbody.innerHTML = "";
+      rows.forEach(r => tbody.appendChild(r));
+      tbody.appendChild(totalRow);
+      asc = !asc;
+    };
+  });
+}
+
+function formatTime(sec) {
+  if (!sec) return "00:00";
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return h ? ${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")} : ${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")};
 }
 
 loadData();
+setInterval(loadData, 5 * 60 * 1000);
 </script>
 </body>
 </html>
