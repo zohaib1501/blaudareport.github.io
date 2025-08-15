@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>Agent Dashboard</title>
 <style>
+  html, body {
+    overflow-x: hidden; /* Prevent page from moving left/right */
+  }
   body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
     background: #e0f7ff;
@@ -33,10 +36,13 @@
     font-weight: bold;
     color: #003366;
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.9);
-    /* IMPORTANT: no animation on the box itself to avoid overlap/page shift */
   }
   /* Animate only the text inside the boxes */
-  .metric-box .title, .metric-box .agent { animation: textPop 2s infinite alternate; }
+  .metric-box .title, .metric-box .agent {
+    animation: textPop 2s infinite alternate;
+    transform-origin: center;
+    display: inline-block;
+  }
   @keyframes textPop { 0%{transform:scale(1);} 50%{transform:scale(1.1);} 100%{transform:scale(1);} }
   .metric-box .title {
     font-size: 16px; font-weight: bold; text-shadow: 0 0 3px #00f0ff, 0 0 6px #00f0ff; margin-bottom: 6px;
@@ -157,32 +163,26 @@ function processCSV(text) {
   headers = lines[0].map(h => h.trim());
   allData = lines.slice(1);
 
-  populateFilters();   // sets currentMonthKey to latest month
+  populateFilters();
   attachFilterHandlers();
   displayData();
 }
 
-/* ===== DATE HELPERS (robust for 1-Oct-24, 10/1/2024, or Excel serials) ===== */
+/* ===== DATE HELPERS ===== */
 function excelSerialToDate(val) {
   const n = Number(val);
-  if (!isNaN(n) && n > 59) { // ignore Excel's 1900 leap bug range
-    const ms = (n - 25569) * 86400 * 1000; // days since 1970-01-01
+  if (!isNaN(n) && n > 59) {
+    const ms = (n - 25569) * 86400 * 1000;
     return new Date(ms);
   }
   return null;
 }
 function parseMonthValue(v) {
   if (v == null || v === "") return null;
-
-  // Try Excel serial first
   const dSerial = excelSerialToDate(v);
   if (dSerial && !isNaN(dSerial)) return dSerial;
-
-  // Try native Date parsing
   const dNative = new Date(v);
   if (!isNaN(dNative)) return dNative;
-
-  // Try dd-MMM-yy or d-MMM-yy (e.g., 1-Oct-24)
   const m = String(v).trim().match(/^(\d{1,2})[-/ ]([A-Za-z]{3,})[-/ ](\d{2,4})$/);
   if (m) {
     const day = parseInt(m[1],10);
@@ -192,24 +192,17 @@ function parseMonthValue(v) {
     const fullYear = yr < 100 ? 2000 + yr : yr;
     if (monthIdx >= 0) return new Date(fullYear, monthIdx, day);
   }
-  return null; // give up
+  return null;
 }
-function yyyymm(d) {
-  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
-}
-function label_mmmYY(d) {
-  return d.toLocaleString('en-US', { month:'short', year:'2-digit' });
-}
+function yyyymm(d) { return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0"); }
+function label_mmmYY(d) { return d.toLocaleString('en-US', { month:'short', year:'2-digit' }); }
 
 /* ===== FILTERS ===== */
 function populateFilters() {
   const idxMonth = headers.indexOf("Month");
   const idxQuarter = headers.indexOf("Quarters");
-
-  // Build unique months keyed by yyyymm
-  const monthMap = new Map(); // key -> {key, date}
+  const monthMap = new Map();
   const quarterSet = new Set();
-
   allData.forEach(r => {
     const md = parseMonthValue(r[idxMonth]);
     if (md && !isNaN(md)) {
@@ -218,53 +211,28 @@ function populateFilters() {
     }
     if (r[idxQuarter]) quarterSet.add(r[idxQuarter]);
   });
-
-  // Sort months DESC by actual date
   const months = Array.from(monthMap.values()).sort((a,b) => b.date - a.date);
-
-  // Populate Month dropdown: All Months + mmm-yy items (values are yyyymm keys)
   const monthDD = document.getElementById('monthDropdown');
   monthDD.innerHTML = `<option value="">All Months</option>` +
     months.map(m => `<option value="${m.key}">${label_mmmYY(m.date)}</option>`).join('');
-
-  // Default to latest month (first in DESC), e.g., Aug-25
-  if (months.length) {
-    monthDD.value = months[0].key;
-    currentMonthKey = months[0].key;
-  } else {
-    // no months parsed; leave at All Months
-    currentMonthKey = "";
-  }
-
-  // Populate Quarter dropdown: blank (Select) + All Quarters + Q1..Q4 present in CSV
+  if (months.length) { monthDD.value = months[0].key; currentMonthKey = months[0].key; }
   const quarterDD = document.getElementById('quarterDropdown');
-  const quarters = Array.from(quarterSet).filter(Boolean).sort(); // e.g., ["Q1","Q2","Q3","Q4"]
-  quarterDD.innerHTML =
-    `<option value="">Select Quarter</option>` +
-    `<option value="ALL_Q">All Quarters</option>` +
+  const quarters = Array.from(quarterSet).filter(Boolean).sort();
+  quarterDD.innerHTML = `<option value="">Select Quarter</option><option value="ALL_Q">All Quarters</option>` +
     quarters.map(q => `<option value="${q}">${q}</option>`).join('');
-  quarterDD.value = ""; // blank by default to respect "month selected -> quarter blank"
+  quarterDD.value = "";
 }
-
 function attachFilterHandlers() {
   const monthDD = document.getElementById('monthDropdown');
   const quarterDD = document.getElementById('quarterDropdown');
-
   monthDD.addEventListener('change', e => {
-    currentMonthKey = e.target.value;         // yyyymm or ""
-    if (currentMonthKey) {                    // month chosen -> blank out quarter
-      quarterDD.value = "";
-      currentQuarter = "";
-    }
+    currentMonthKey = e.target.value;
+    if (currentMonthKey) { quarterDD.value = ""; currentQuarter = ""; }
     displayData();
   });
-
   quarterDD.addEventListener('change', e => {
-    currentQuarter = e.target.value;          // "", "ALL_Q", "Q1".."Q4"
-    if (currentQuarter) {                     // quarter chosen -> blank out month
-      monthDD.value = "";
-      currentMonthKey = "";
-    }
+    currentQuarter = e.target.value;
+    if (currentQuarter) { monthDD.value = ""; currentMonthKey = ""; }
     displayData();
   });
 }
@@ -282,70 +250,46 @@ function displayData() {
     talk: headers.indexOf("Total Talktime"),
     profit: headers.indexOf("Estimated SOK Profit")
   };
-
   let rows = allData;
-
-  // Apply Month filter (by month-year key)
   if (currentMonthKey) {
     rows = rows.filter(r => {
       const d = parseMonthValue(r[idx.month]);
       return d && yyyymm(d) === currentMonthKey;
     });
   }
-
-  // Apply Quarter filter (from CSV), ignore when "ALL_Q"
   if (currentQuarter && currentQuarter !== "ALL_Q") {
     rows = rows.filter(r => (r[idx.quarter] || "") === currentQuarter);
   }
-
-  // Group by shift & agent; compute totals
   const grouped = { morning: {}, night: {} };
-  const top = {}; // by agent across both shifts
-
+  const top = {};
   rows.forEach(r => {
     const agent = r[idx.agent];
     const shiftRaw = (r[idx.shift] || "").toLowerCase();
     const shift = shiftRaw.includes("morning") ? "morning" : "night";
-
     const sok = +r[idx.sok] || 0;
     const reserved = +r[idx.reserved] || 0;
     const calls = +r[idx.calls] || 0;
     const profit = +r[idx.profit] || 0;
-
-    // talktime might be HH:MM:SS or MM:SS or numeric seconds
     let talk = 0;
     const rawTalk = (r[idx.talk] || "").toString();
     if (rawTalk.includes(":")) {
       const t = rawTalk.split(":").map(Number);
       talk = t.length === 3 ? (t[0]*3600 + t[1]*60 + t[2]) : (t[0]*60 + t[1]);
-    } else {
-      talk = +rawTalk || 0;
-    }
-
+    } else { talk = +rawTalk || 0; }
     if (!grouped[shift][agent]) grouped[shift][agent] = { agent, sokTotal:0, reservedTotal:0, callsTotal:0, talkTotal:0, profitTotal:0 };
     const g = grouped[shift][agent];
-    g.sokTotal += sok;
-    g.reservedTotal += reserved;
-    g.callsTotal += calls;
-    g.talkTotal += talk;
-    g.profitTotal += profit;
-
+    g.sokTotal += sok; g.reservedTotal += reserved; g.callsTotal += calls; g.talkTotal += talk; g.profitTotal += profit;
     if (!top[agent]) top[agent] = { sokTotal:0, callsTotal:0, profitTotal:0 };
-    top[agent].sokTotal += sok;
-    top[agent].callsTotal += calls;
-    top[agent].profitTotal += profit;
+    top[agent].sokTotal += sok; top[agent].callsTotal += calls; top[agent].profitTotal += profit;
   });
-
   renderShift(Object.values(grouped.morning), document.getElementById('morningTable'));
   renderShift(Object.values(grouped.night), document.getElementById('nightTable'));
   renderTop(top);
 }
-
 function renderShift(data, container) {
   const totals = { sokTotal:0, reservedTotal:0, callsTotal:0, talkTotal:0, profitTotal:0 };
   data.forEach(d => { for (const k in totals) totals[k] += d[k]; });
   data.push({ agent: "Grand Total", ...totals });
-
   const headersRow = ["Sales Agent","SOK Count","Reserved Count","Total Calls","Total Talktime","Estimated SOK Profit"];
   let html = "<table><thead><tr>" + headersRow.map(h=>`<th>${h}</th>`).join('') + "</tr></thead><tbody>";
   data.forEach(d => {
@@ -362,7 +306,6 @@ function renderShift(data, container) {
   container.innerHTML = html;
   enableSorting(container);
 }
-
 function renderTop(agg) {
   function boxHtml(title, key) {
     const top3 = Object.entries(agg)
@@ -375,7 +318,6 @@ function renderTop(agg) {
   document.getElementById('topProfit').innerHTML = boxHtml("Highest Profit - Top3","profitTotal");
   document.getElementById('topCalls').innerHTML = boxHtml("Highest Calls - Top3","callsTotal");
 }
-
 function enableSorting(container) {
   const table = container.querySelector("table");
   if (!table) return;
@@ -385,28 +327,23 @@ function enableSorting(container) {
     let asc = true;
     th.onclick = () => {
       const rows = Array.from(tbody.querySelectorAll("tr"));
-      const totalRow = rows.pop(); // keep Grand Total at bottom
+      const totalRow = rows.pop();
       rows.sort((a,b) => {
-        const aVal = a.cells[idx].dataset.value || a.cells[idx].innerText;
-        const bVal = b.cells[idx].dataset.value || b.cells[idx].innerText;
-        const aNum = parseFloat(String(aVal).replace(/[^0-9.-]/g,""));
-        const bNum = parseFloat(String(bVal).replace(/[^0-9.-]/g,""));
+        const aVal = a.cells[idx].getAttribute("data-value");
+        const bVal = b.cells[idx].getAttribute("data-value");
+        const aNum = parseFloat(aVal), bNum = parseFloat(bVal);
         if (!isNaN(aNum) && !isNaN(bNum)) return asc ? aNum - bNum : bNum - aNum;
-        return asc ? String(aVal).localeCompare(String(bVal)) : String(bVal).localeCompare(String(aVal));
+        return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
       });
-      tbody.innerHTML = "";
-      rows.forEach(r => tbody.appendChild(r));
-      tbody.appendChild(totalRow);
       asc = !asc;
+      tbody.innerHTML = ""; rows.forEach(r=>tbody.appendChild(r)); tbody.appendChild(totalRow);
     };
   });
 }
-
 function formatTime(sec) {
-  if (!sec) return "00:00";
+  if (isNaN(sec) || sec <= 0) return "00:00";
   const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
-  return h ? `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
-           : `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  return [h,m,s].map(v=>String(v).padStart(2,"0")).join(":");
 }
 </script>
 </body>
