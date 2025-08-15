@@ -162,174 +162,167 @@
 <body>
   <!-- Password protection -->
   <script>
-    var password = prompt("Enter password to access this site:");
-    if (password !== "Blauda123") {
-      document.body.innerHTML = "<h1>Access Denied</h1>";
-      document.body.style.textAlign = "center";
-    }
-  </script>
-
-  <h2>Agent Dashboard - Compact View</h2>
-  <div id="lastUpdated"></div>
-  <div style="text-align:center;">
-    <select id="monthDropdown"></select>
-  </div>
-
-  <div class="top-row">
-    <div id="topSok" class="metric-box"></div>
-    <div id="topProfit" class="metric-box"></div>
-    <div id="topCalls" class="metric-box"></div>
-  </div>
-
-  <div class="shift-container">
-    <div class="shift-table">
-      <h3>Morning Shift</h3>
-      <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
-    </div>
-    <div class="shift-table">
-      <h3>Night Shift</h3>
-      <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
-    </div>
-  </div>
-
-  <script>
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
-    
-    const monthDropdown = document.getElementById('monthDropdown');
-    const topSok = document.getElementById('topSok');
-    const topProfit = document.getElementById('topProfit');
-    const topCalls = document.getElementById('topCalls');
-    const morningDiv = document.getElementById('morningTable');
-    const nightDiv = document.getElementById('nightTable');
-    const lastUpdated = document.getElementById('lastUpdated');
-    
-    let allData = [], headers = [], currentMonth = "ALL";
-    let latestMonth = "ALL"; // Variable to hold the latest month
-
-    async function loadData() {
-      const response = await fetch(CSV_URL);
-      const text = await response.text();
-      processCSV(text);
-      lastUpdated.textContent = "Last updated: " + new Date().toLocaleString();
-    }
-
-    function processCSV(text) {
-      const lines = text.trim().split('\n').map(parseCSVLine);
-      headers = lines[0].map(h => h ? h.trim() : "");
-      allData = lines.slice(1);
-      populateMonths();
-      displayData(currentMonth);
-    }
-
-    function parseCSVLine(line) {
-      const result = [];
-      let inQuotes = false, value = '';
-      for (let i = 0; i < line.length; i++) {
-        const c = line[i];
-        if (c == '"' && line[i + 1] == '"') {
-          value += '"';
-          i++;
-        } else if (c == '"') inQuotes = !inQuotes;
-        else if (c == ',' && !inQuotes) {
-          result.push(value.trim());
-          value = '';
-        } else value += c;
+    window.onload = function() {
+      var password = prompt("Enter password to access this site:");
+      if (password !== "Blauda123") {
+        document.body.innerHTML = "<h1>Access Denied</h1>";
+        document.body.style.textAlign = "center";
+      } else {
+        // Load the rest of the content only if the password is correct
+        loadPageContent();
       }
-      result.push(value.trim());
-      return result;
-    }
+    };
 
-    function populateMonths() {
-      const monthIndex = headers.indexOf("Month");
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      
-      const monthPairs = Array.from(new Set(allData.map(row => {
-        const raw = row[monthIndex];
-        if (!raw) return null;
-        
-        let dateObj;
-        if (!isNaN(Date.parse(raw))) dateObj = new Date(raw);
-        else {
-          const parts = raw.split(/[-\\/]/);
-          if (parts.length >= 3) {
-            const day = parseInt(parts[2]);
-            const month = parseInt(parts[1]) - 1;
-            const year = parseInt(parts[0]);
-            dateObj = new Date(year, month, day);
+    function loadPageContent() {
+      // Insert all the page content that should be shown after password verification
+      document.body.innerHTML = `
+        <h2>Agent Dashboard - Compact View</h2>
+        <div id="lastUpdated"></div>
+        <div style="text-align:center;">
+          <select id="monthDropdown"></select>
+        </div>
+
+        <div class="top-row">
+          <div id="topSok" class="metric-box"></div>
+          <div id="topProfit" class="metric-box"></div>
+          <div id="topCalls" class="metric-box"></div>
+        </div>
+
+        <div class="shift-container">
+          <div class="shift-table">
+            <h3>Morning Shift</h3>
+            <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
+          </div>
+          <div class="shift-table">
+            <h3>Night Shift</h3>
+            <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
+          </div>
+        </div>
+
+        <script>
+          const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
+          
+          const monthDropdown = document.getElementById('monthDropdown');
+          const topSok = document.getElementById('topSok');
+          const topProfit = document.getElementById('topProfit');
+          const topCalls = document.getElementById('topCalls');
+          const morningDiv = document.getElementById('morningTable');
+          const nightDiv = document.getElementById('nightTable');
+          const lastUpdated = document.getElementById('lastUpdated');
+          
+          let allData = [], headers = [], currentMonth = "ALL";
+          let latestMonth = "ALL"; 
+
+          async function loadData() {
+            const response = await fetch(CSV_URL);
+            const text = await response.text();
+            processCSV(text);
+            lastUpdated.textContent = "Last updated: " + new Date().toLocaleString();
           }
-        }
-        return dateObj ? monthNames[dateObj.getMonth()] : null;
-      })).filter(Boolean));
 
-      const uniqueMonths = Array.from(new Set(monthPairs));
-      uniqueMonths.forEach(month => {
-        const option = document.createElement('option');
-        option.textContent = month;
-        option.value = month;
-        monthDropdown.appendChild(option);
-      });
+          function processCSV(text) {
+            const lines = text.trim().split('\n').map(parseCSVLine);
+            headers = lines[0].map(h => h ? h.trim() : "");
+            allData = lines.slice(1);
+            populateMonths();
+            displayData(currentMonth);
+          }
 
-      latestMonth = uniqueMonths[uniqueMonths.length - 1];  // Latest available month
-      monthDropdown.value = latestMonth;  // Set dropdown to latest month
-    }
+          function parseCSVLine(line) {
+            const result = [];
+            let inQuotes = false, value = '';
+            for (let i = 0; i < line.length; i++) {
+              const c = line[i];
+              if (c == '"' && line[i + 1] == '"') {
+                value += '"';
+                i++;
+              } else if (c == '"') inQuotes = !inQuotes;
+              else if (c == ',' && !inQuotes) {
+                result.push(value.trim());
+                value = '';
+              } else value += c;
+            }
+            result.push(value.trim());
+            return result;
+          }
 
-    function displayData(month) {
-      const monthIndex = headers.indexOf("Month");
-      const filteredData = allData.filter(row => row[monthIndex] === month || month === "ALL");
-      updateTopMetrics(filteredData);
-      populateShiftTables(filteredData);
-    }
+          function populateMonths() {
+            const monthIndex = headers.indexOf("Month");
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            const monthPairs = allData.map(row => row[monthIndex]).filter(Boolean);
+            const uniqueMonths = Array.from(new Set(monthPairs));
 
-    function updateTopMetrics(data) {
-      const sokTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("SOK")]) || 0, 0);
-      const profitTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("Profit")]) || 0, 0);
-      const callsTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("Calls")]) || 0, 0);
+            uniqueMonths.forEach(month => {
+              const option = document.createElement('option');
+              option.textContent = month;
+              option.value = month;
+              monthDropdown.appendChild(option);
+            });
 
-      topSok.innerHTML = `<div class="title">SOK</div><div class="value">${sokTotal.toFixed(2)}</div>`;
-      topProfit.innerHTML = `<div class="title">Profit</div><div class="value">${profitTotal.toFixed(2)}</div>`;
-      topCalls.innerHTML = `<div class="title">Calls</div><div class="value">${callsTotal.toFixed(0)}</div>`;
-    }
+            latestMonth = uniqueMonths[uniqueMonths.length - 1]; 
+            monthDropdown.value = latestMonth;
+          }
 
-    function populateShiftTables(data) {
-      const morningData = data.filter(row => row[headers.indexOf("Shift")] === "Morning");
-      const nightData = data.filter(row => row[headers.indexOf("Shift")] === "Night");
+          monthDropdown.addEventListener('change', (e) => {
+            currentMonth = e.target.value;
+            displayData(currentMonth);
+          });
 
-      morningDiv.innerHTML = generateShiftTable(morningData);
-      nightDiv.innerHTML = generateShiftTable(nightData);
-    }
+          function displayData(month) {
+            const monthIndex = headers.indexOf("Month");
+            const filteredData = allData.filter(row => row[monthIndex] === month || month === "ALL");
+            updateTopMetrics(filteredData);
+            populateShiftTables(filteredData);
+          }
 
-    function generateShiftTable(shiftData) {
-      const shiftTableHTML = `
-        <table>
-          <thead>
-            <tr>
-              <th>Agent</th>
-              <th>SOK</th>
-              <th>Profit</th>
-              <th>Calls</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${shiftData.map(row => `
-              <tr>
-                <td>${row[headers.indexOf("Agent")]}</td>
-                <td>${parseFloat(row[headers.indexOf("SOK")]).toFixed(2)}</td>
-                <td>${parseFloat(row[headers.indexOf("Profit")]).toFixed(2)}</td>
-                <td>${parseFloat(row[headers.indexOf("Calls")]).toFixed(0)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+          function updateTopMetrics(data) {
+            const sokTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("SOK")]) || 0, 0);
+            const profitTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("Profit")]) || 0, 0);
+            const callsTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("Calls")]) || 0, 0);
+
+            topSok.innerHTML = `<div class="title">SOK</div><div class="value">${sokTotal.toFixed(2)}</div>`;
+            topProfit.innerHTML = `<div class="title">Profit</div><div class="value">${profitTotal.toFixed(2)}</div>`;
+            topCalls.innerHTML = `<div class="title">Calls</div><div class="value">${callsTotal.toFixed(0)}</div>`;
+          }
+
+          function populateShiftTables(data) {
+            const morningData = data.filter(row => row[headers.indexOf("Shift")] === "Morning");
+            const nightData = data.filter(row => row[headers.indexOf("Shift")] === "Night");
+
+            morningDiv.innerHTML = generateShiftTable(morningData);
+            nightDiv.innerHTML = generateShiftTable(nightData);
+          }
+
+          function generateShiftTable(shiftData) {
+            return `
+              <table>
+                <thead>
+                  <tr>
+                    <th>Agent</th>
+                    <th>SOK</th>
+                    <th>Profit</th>
+                    <th>Calls</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${shiftData.map(row => `
+                    <tr>
+                      <td>${row[headers.indexOf("Agent")]}</td>
+                      <td>${parseFloat(row[headers.indexOf("SOK")]).toFixed(2)}</td>
+                      <td>${parseFloat(row[headers.indexOf("Profit")]).toFixed(2)}</td>
+                      <td>${parseFloat(row[headers.indexOf("Calls")]).toFixed(0)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            `;
+          }
+
+          loadData(); 
+        </script>
       `;
-      return shiftTableHTML;
     }
-
-    monthDropdown.addEventListener('change', (e) => {
-      currentMonth = e.target.value;
-      displayData(currentMonth);
-    });
-
-    loadData();  // Initialize everything
   </script>
 </body>
 </html>
