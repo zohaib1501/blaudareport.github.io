@@ -15,152 +15,46 @@
     flex-direction: column;
     height: 100vh;
   }
-  h2 {
-    text-align: center;
-    color: #0077cc;
-    margin: 5px 0;
-    font-size: 18px;
-  }
-  #lastUpdated {
-    text-align: center;
-    font-size: 10px;
-    color: #004d80;
-    margin: 2px 0;
-  }
+  h2 { text-align: center; color: #0077cc; margin: 5px 0; font-size: 18px; }
+  #lastUpdated { text-align: center; font-size: 10px; color: #004d80; margin: 2px 0; }
   select {
-    padding: 3px 6px;
-    font-size: 11px;
-    border-radius: 4px;
-    border: 1px solid #00bfff;
-    background: #b3e5ff;
-    color: #003366;
-    margin-bottom: 6px;
+    padding: 3px 6px; font-size: 11px; border-radius: 4px; border: 1px solid #00bfff;
+    background: #b3e5ff; color: #003366; margin-bottom: 6px;
   }
-  .top-row {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
+  .top-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; }
   .metric-box {
-    flex: 0 0 32%;
-    background: linear-gradient(135deg, #00bfff, #1ec5ff);
-    border: 2px solid #00f0ff;
-    padding: 12px;
-    border-radius: 12px;
-    text-align: center;
-    font-weight: bold;
-    color: #003366;
+    flex: 0 0 32%; background: linear-gradient(135deg, #00bfff, #1ec5ff);
+    border: 2px solid #00f0ff; padding: 12px; border-radius: 12px;
+    text-align: center; font-weight: bold; color: #003366;
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.9);
   }
   /* Animate only text */
-  .metric-box .title, .metric-box .agent {
-    animation: textPop 2s infinite alternate;
-  }
-  @keyframes textPop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-  }
+  .metric-box .title, .metric-box .agent { animation: textPop 2s infinite alternate; }
+  @keyframes textPop { 0%{transform:scale(1);} 50%{transform:scale(1.1);} 100%{transform:scale(1);} }
   .metric-box .title {
-    font-size: 16px;
-    font-weight: bold;
-    text-shadow: 0 0 3px #00f0ff, 0 0 6px #00f0ff;
-    margin-bottom: 6px;
+    font-size: 16px; font-weight: bold; text-shadow: 0 0 3px #00f0ff, 0 0 6px #00f0ff; margin-bottom: 6px;
   }
-  .metric-box .agent {
-    font-size: 14px;
-    margin: 3px 0;
-    text-shadow: 0 0 2px #ffffff, 0 0 4px #00bfff;
-  }
-  .shift-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 6px;
-    flex: 1 1 auto;
-    overflow: hidden;
-  }
+  .metric-box .agent { font-size: 14px; margin: 3px 0; text-shadow: 0 0 2px #ffffff, 0 0 4px #00bfff; }
+  .shift-container { display: flex; justify-content: space-between; gap: 6px; flex: 1 1 auto; overflow: hidden; }
   .shift-table {
-    background: #b3e5ff;
-    border-radius: 6px;
-    padding: 6px;
-    flex: 1;
-    min-width: 45%;
-    box-shadow: 0 0 8px #00bfff88;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    color: #003366;
-    overflow: hidden;
+    background: #b3e5ff; border-radius: 6px; padding: 6px; flex: 1; min-width: 45%;
+    box-shadow: 0 0 8px #00bfff88; text-align: center; display: flex; flex-direction: column; height: 100%;
+    color: #003366; overflow: hidden;
   }
-  .shift-table h3 {
-    margin: 3px 0 6px;
-    font-size: 13px;
-    color: #0077cc;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11px;
-    background: #e6f7ff;
-    flex: 1 1 auto;
-    color: #003366;
-    overflow: hidden;
-  }
-  thead th {
-    background: #00bfff;
-    padding: 4px;
-    font-size: 11px;
-    color: #003366;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  tbody td {
-    padding: 3px 2px;
-    text-align: center;
-    border-bottom: 1px solid #00aaff;
-  }
-  tbody tr:nth-child(odd) {
-    background-color: #cceeff;
-  }
-  tbody tr:last-child {
-    background-color: #00bfff;
-    font-weight: bold;
-    color: #ffffff;
-  }
-  tbody tr:hover {
-    background-color: #99e6ff;
-  }
+  .shift-table h3 { margin: 3px 0 6px; font-size: 13px; color: #0077cc; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; background: #e6f7ff; flex: 1 1 auto; color: #003366; }
+  thead th { background: #00bfff; padding: 4px; font-size: 11px; color: #003366; cursor: pointer; border-radius: 4px; }
+  tbody td { padding: 3px 2px; text-align: center; border-bottom: 1px solid #00aaff; }
+  tbody tr:nth-child(odd) { background-color: #cceeff; }
+  tbody tr:last-child { background-color: #00bfff; font-weight: bold; color: #ffffff; }
+  tbody tr:hover { background-color: #99e6ff; }
   /* Password Screen */
   #passwordScreen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background: #e0f7ff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #e0f7ff;
   }
-  #passwordScreen input {
-    padding: 5px;
-    margin: 5px;
-    border-radius: 4px;
-    border: 1px solid #00bfff;
-  }
-  #passwordScreen button {
-    padding: 5px 10px;
-    border: none;
-    background: #00bfff;
-    color: #003366;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  #errorMsg {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-  }
+  #passwordScreen input { padding: 5px; margin: 5px; border-radius: 4px; border: 1px solid #00bfff; }
+  #passwordScreen button { padding: 5px 10px; border: none; background: #00bfff; color: #003366; font-weight: bold; cursor: pointer; border-radius: 4px; }
+  #errorMsg { color: red; font-size: 12px; margin-top: 5px; }
 </style>
 </head>
 <body>
@@ -202,7 +96,6 @@ const PASSWORD = "blauda123";
 
 let allData = [], headers = [], currentMonth = "", currentQuarter = "";
 
-// Password logic
 document.getElementById('showPass').addEventListener('change', e => {
   document.getElementById('passwordInput').type = e.target.checked ? 'text' : 'password';
 });
@@ -210,6 +103,7 @@ document.getElementById('passwordBtn').addEventListener('click', checkPassword);
 document.getElementById('passwordInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') checkPassword();
 });
+
 function checkPassword() {
   const inputPass = document.getElementById('passwordInput').value;
   if (inputPass === PASSWORD) {
@@ -221,7 +115,6 @@ function checkPassword() {
   }
 }
 
-// Fetch data
 async function loadData() {
   const response = await fetch(CSV_URL);
   const text = await response.text();
@@ -229,7 +122,6 @@ async function loadData() {
   document.getElementById('lastUpdated').textContent = "Last updated: " + new Date().toLocaleString();
 }
 
-// Parse CSV
 function parseCSVLine(line) {
   const result = [];
   let inQuotes = false, value = '';
@@ -242,6 +134,15 @@ function parseCSVLine(line) {
   }
   result.push(value.trim());
   return result;
+}
+
+function excelDateToJSDate(serial) {
+  if (!isNaN(serial) && serial > 25569) {
+    const utc_days = Math.floor(serial - 25569);
+    const utc_value = utc_days * 86400;                                        
+    return new Date(utc_value * 1000);
+  }
+  return new Date(serial);
 }
 
 function processCSV(text) {
@@ -265,20 +166,24 @@ function populateFilters() {
     quarterSet.add(row[quarterIndex]);
   });
 
-  const monthArray = Array.from(monthSet).sort((a,b) => new Date(b) - new Date(a));
+  const monthArray = Array.from(monthSet)
+    .map(m => ({ raw: m, date: excelDateToJSDate(m) }))
+    .filter(m => !isNaN(m.date))
+    .sort((a,b) => b.date - a.date);
+
   const quarterArray = Array.from(quarterSet);
 
-  document.getElementById('monthDropdown').innerHTML = 
-    `<option value="">All Months</option>` + 
-    monthArray.map(m => `<option value="${m}">${new Date(m).toLocaleString('en-US',{month:'short',year:'2-digit'})}</option>`).join('');
+  document.getElementById('monthDropdown').innerHTML =
+    `<option value="">All Months</option>` +
+    monthArray.map(m => `<option value="${m.raw}">${m.date.toLocaleString('en-US',{month:'short',year:'2-digit'})}</option>`).join('');
 
-  document.getElementById('quarterDropdown').innerHTML = 
-    `<option value="">All Quarters</option>` + 
+  document.getElementById('quarterDropdown').innerHTML =
+    `<option value="">All Quarters</option>` +
     quarterArray.map(q => `<option value="${q}">${q}</option>`).join('');
 
   if (monthArray.length > 0) {
-    document.getElementById('monthDropdown').value = monthArray[0];
-    currentMonth = monthArray[0];
+    document.getElementById('monthDropdown').value = monthArray[0].raw;
+    currentMonth = monthArray[0].raw;
   }
 }
 
@@ -302,10 +207,8 @@ function addFilterListeners() {
 }
 
 function displayData() {
-  // Your existing table + topper calculation logic here
-  // It will automatically filter based on currentMonth or currentQuarter
+  // Your original table + topper logic goes here
 }
-
 </script>
 </body>
 </html>
