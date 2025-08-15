@@ -181,6 +181,7 @@
     }
 
     function loadPageContent() {
+      // Clear login prompt and load dashboard content
       document.body.innerHTML = `
         <h2>Agent Dashboard - Compact View</h2>
         <div id="lastUpdated"></div>
@@ -239,16 +240,16 @@
             let inQuotes = false, value = '';
             for (let i = 0; i < line.length; i++) {
               const c = line[i];
-              if (c == '"' && line[i + 1] == '"') {
-                value += '"';
-                i++;
-              } else if (c == '"') inQuotes = !inQuotes;
-              else if (c == ',' && !inQuotes) { 
-                result.push(value.trim()); 
-                value = ''; 
-              } else value += c;
+              if (c === ',' && !inQuotes) {
+                result.push(value);
+                value = '';
+              } else if (c === '"' && (i === 0 || line[i-1] !== '\\')) {
+                inQuotes = !inQuotes;
+              } else {
+                value += c;
+              }
             }
-            result.push(value.trim());
+            result.push(value);
             return result;
           }
 
@@ -268,7 +269,6 @@
           function displayData(month) {
             currentMonth = month;
             const filteredData = currentMonth === "ALL" ? allData : allData.filter(row => row[headers.indexOf("Month")] === currentMonth);
-            
             displayTopMetrics(filteredData);
             displayShifts(filteredData);
           }
