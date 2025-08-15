@@ -158,25 +158,21 @@
     background-color: #99e6ff;
   }
 
-  /* Add color to the password input field */
-  input[type="password"], input[type="text"] {
-    color: black;
+  #passwordInput {
+    font-size: 16px;
+    padding: 8px;
+    margin: 10px 0;
   }
+
+  .show-password-btn {
+    color: #0077cc;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
 </style>
 </head>
 <body>
-
-<!-- Password Protection Popup -->
-<div id="passwordPopup" style="display: none;">
-  <div style="text-align: center; background-color: #ffffff; padding: 20px; border: 2px solid #0077cc; border-radius: 12px; width: 300px; margin: 100px auto;">
-    <h3>Enter Password</h3>
-    <input type="password" id="password" placeholder="Password" style="padding: 8px; width: 80%; margin-bottom: 10px;">
-    <input type="checkbox" id="showPassword"> Show Password
-    <br>
-    <button onclick="validatePassword()" style="padding: 8px 15px; background-color: #0077cc; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;">Submit</button>
-  </div>
-</div>
-
 <h2>Agent Dashboard - Compact View</h2>
 <div id="lastUpdated"></div>
 <div style="text-align:center;">
@@ -200,9 +196,20 @@
   </div>
 </div>
 
+<div id="passwordPrompt" style="display: block;">
+  <div style="text-align: center;">
+    <h3>Enter Password</h3>
+    <input id="passwordInput" type="password" placeholder="Enter password" />
+    <span class="show-password-btn" onclick="togglePassword()">Show</span>
+    <br />
+    <button onclick="checkPassword()">Submit</button>
+  </div>
+</div>
+
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
 
+const validPassword = "yourPasswordHere"; // Set your password here
 const monthDropdown = document.getElementById('monthDropdown');
 const topSok = document.getElementById('topSok');
 const topProfit = document.getElementById('topProfit');
@@ -210,31 +217,31 @@ const topCalls = document.getElementById('topCalls');
 const morningDiv = document.getElementById('morningTable');
 const nightDiv = document.getElementById('nightTable');
 const lastUpdated = document.getElementById('lastUpdated');
+const passwordPrompt = document.getElementById('passwordPrompt');
+const passwordInput = document.getElementById('passwordInput');
 
 let allData = [], headers = [], currentMonth = "ALL";
-const validPassword = "blauda123";  // Replace with your actual password
 
-// Show the password popup on page load
-showPasswordPopup();
-
-function showPasswordPopup() {
-  document.getElementById('passwordPopup').style.display = 'block';
-}
-
-function validatePassword() {
-  const enteredPassword = document.getElementById('password').value;
+// Password protection check
+function checkPassword() {
+  const enteredPassword = passwordInput.value.trim();
   if (enteredPassword === validPassword) {
-    document.getElementById('passwordPopup').style.display = 'none';
+    passwordPrompt.style.display = 'none';
     loadData();
   } else {
-    alert('Incorrect password');
+    alert("Invalid password");
   }
 }
 
-document.getElementById('showPassword').addEventListener('change', function() {
-  const passwordField = document.getElementById('password');
-  passwordField.type = this.checked ? 'text' : 'password';
-});
+// Toggle password visibility
+function togglePassword() {
+  const passwordField = document.getElementById('passwordInput');
+  if (passwordField.type === "password") {
+    passwordField.type = "text";
+  } else {
+    passwordField.type = "password";
+  }
+}
 
 async function loadData() {
   const response = await fetch(CSV_URL);
@@ -245,9 +252,8 @@ async function loadData() {
 
 function processCSV(text) {
   const lines = text.trim().split('\n').map(parseCSVLine);
-  headers = lines[0].map(h => h.trim());
+  headers = lines[0].map(h => h ? h.trim() : "");
   allData = lines.slice(1);
-
   populateMonths();
   displayData(currentMonth);
 }
@@ -256,86 +262,87 @@ function parseCSVLine(line) {
   const result = [];
   let inQuotes = false, value = '';
   for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (char === '"' && line[i - 1] !== '\\') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      result.push(value.trim());
-      value = '';
-    } else {
-      value += char;
-    }
+    const c = line[i];
+    if (c == '"' && line[i + 1] == '"') { value += c; i++; }
+    else if (c == '"') inQuotes = !inQuotes;
+    else if (c == ',' && !inQuotes) { result.push(value.trim()); value = ''; }
+    else value += c;
   }
   result.push(value.trim());
   return result;
 }
 
 function populateMonths() {
-  const monthIndex = headers.indexOf('Month');
-  const monthSet = new Set(allData.map(row => row[monthIndex] || ""));
-  const months = Array.from(monthSet);
+  const months = [...new Set(allData.map(row => row[0]))];
+  const monthDropdownOptions = months.map(month => ({
+    value: month,
+    text: formatMonth(month)
+  }));
 
-  months.forEach(month => {
-    const option = document.createElement('option');
-    option.value = month;
-    option.textContent = month;
-    monthDropdown.appendChild(option);
-  });
+  monthDropdownOptions.sort((a, b) => new Date(b.value) - new Date(a.value));
 
-  // Default to latest month ("Aug-25" as the latest in data)
-  if (months.length > 0) {
-    monthDropdown.value = "Aug-25";  // Set default month
-    currentMonth = "Aug-25";  // Set default month
-  }
+  // Set the default selected month as the latest month
+  monthDropdown.innerHTML = monthDropdownOptions.map(opt => 
+    `<option value="${opt.value}" ${opt.value === monthDropdownOptions[0].value ? 'selected' : ''}>${opt.text}</option>`
+  ).join('');
+
+  monthDropdown.value = monthDropdownOptions[0].value;
+  currentMonth = monthDropdown.value;
+}
+
+function formatMonth(month) {
+  const date = new Date(month);
+  const options = { month: 'short', year: '2-digit' };
+  return new Intl.DateTimeFormat('en-US', options).format(date);
 }
 
 function displayData(month) {
-  const monthIndex = headers.indexOf('Month');
-  const filteredData = month === "ALL" ? allData : allData.filter(row => row[monthIndex] === month);
-
-  const morningData = filteredData.filter(row => row[headers.indexOf('Shift')] === 'Morning');
-  const nightData = filteredData.filter(row => row[headers.indexOf('Shift')] === 'Night');
-
-  renderTable(morningDiv, morningData);
-  renderTable(nightDiv, nightData);
-
-  updateMetrics(filteredData);
+  const filteredData = allData.filter(row => row[0] === month);
+  processTopMetrics(filteredData);
+  populateShiftTables(filteredData);
 }
 
-function renderTable(container, data) {
-  const table = document.createElement('table');
-  const headerRow = document.createElement('tr');
-  
-  headers.forEach(header => {
-    const th = document.createElement('th');
-    th.textContent = header;
-    headerRow.appendChild(th);
-  });
+function processTopMetrics(data) {
+  const topSokData = data.sort((a, b) => b[1] - a[1])[0];
+  const topProfitData = data.sort((a, b) => b[2] - a[2])[0];
+  const topCallsData = data.sort((a, b) => b[3] - a[3])[0];
 
-  table.appendChild(headerRow);
-
-  data.forEach(row => {
-    const rowElement = document.createElement('tr');
-    row.forEach(cell => {
-      const td = document.createElement('td');
-      td.textContent = cell;
-      rowElement.appendChild(td);
-    });
-    table.appendChild(rowElement);
-  });
-
-  container.innerHTML = '';  // Clear any existing content
-  container.appendChild(table);
+  topSok.innerHTML = `<div class="title">Top SOK</div><div class="agent">${topSokData[4]}</div><div class="value">${topSokData[1]}</div>`;
+  topProfit.innerHTML = `<div class="title">Top Profit</div><div class="agent">${topProfitData[4]}</div><div class="value">${topProfitData[2]}</div>`;
+  topCalls.innerHTML = `<div class="title">Top Calls</div><div class="agent">${topCallsData[4]}</div><div class="value">${topCallsData[3]}</div>`;
 }
 
-function updateMetrics(data) {
-  const sok = data.filter(row => row[headers.indexOf('SOK')] !== "").length;
-  const profit = data.reduce((total, row) => total + parseFloat(row[headers.indexOf('Profit')] || 0), 0);
-  const calls = data.reduce((total, row) => total + parseInt(row[headers.indexOf('Calls')] || 0), 0);
+function populateShiftTables(data) {
+  const morningShiftData = data.filter(row => row[5] === "Morning");
+  const nightShiftData = data.filter(row => row[5] === "Night");
 
-  topSok.innerHTML = `<div class="title">SOK</div><div class="agent">${sok}</div>`;
-  topProfit.innerHTML = `<div class="title">Profit</div><div class="agent">${profit}</div>`;
-  topCalls.innerHTML = `<div class="title">Calls</div><div class="agent">${calls}</div>`;
+  morningDiv.innerHTML = generateTableHTML(morningShiftData);
+  nightDiv.innerHTML = generateTableHTML(nightShiftData);
+}
+
+function generateTableHTML(data) {
+  const headers = ["Agent", "SOK", "Profit", "Calls"];
+  const rows = data.map(row => `
+    <tr>
+      <td>${row[4]}</td>
+      <td>${row[1]}</td>
+      <td>${row[2]}</td>
+      <td>${row[3]}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <table>
+      <thead>
+        <tr>
+          ${headers.map(header => `<th>${header}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+      </tbody>
+    </table>
+  `;
 }
 
 </script>
