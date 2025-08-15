@@ -1,431 +1,343 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Agent Dashboard</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, sans-serif;
-      background: #e0f7ff;
-      color: #003366;
-      margin: 0;
-      user-select: none;
-      font-size: 11px;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+<meta charset="UTF-8">
+<title>Agent Dashboard</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #e0f7ff;
+    color: #003366;
+    margin: 0;
+    user-select: none;
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
 
-    h2 {
-      text-align: center;
-      color: #0077cc;
-      margin: 5px 0;
-      font-size: 18px;
-    }
+  h2 {
+    text-align: center;
+    color: #0077cc;
+    margin: 5px 0;
+    font-size: 18px;
+  }
 
-    #lastUpdated {
-      text-align: center;
-      font-size: 10px;
-      color: #004d80;
-      margin: 2px 0;
-    }
+  #lastUpdated {
+    text-align: center;
+    font-size: 10px;
+    color: #004d80;
+    margin: 2px 0;
+  }
 
-    select {
-      padding: 3px 6px;
-      font-size: 11px;
-      border-radius: 4px;
-      border: 1px solid #00bfff;
-      background: #b3e5ff;
-      color: #003366;
-      margin-bottom: 6px;
-    }
+  select {
+    padding: 3px 6px;
+    font-size: 11px;
+    border-radius: 4px;
+    border: 1px solid #00bfff;
+    background: #b3e5ff;
+    color: #003366;
+    margin-bottom: 6px;
+  }
 
-    .top-row {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
+  .top-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
 
-    .metric-box {
-      flex: 0 0 32%;
-      background: linear-gradient(135deg, #00bfff, #1ec5ff);
-      border: 2px solid #00f0ff;
-      padding: 12px;
-      border-radius: 12px;
-      text-align: center;
-      font-weight: bold;
-      color: #003366;
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.9);
-      position: relative;
-      overflow: hidden;
-      animation: pop 2s infinite alternate;
-    }
+  .metric-box {
+    flex: 0 0 32%;
+    background: linear-gradient(135deg, #00bfff, #1ec5ff);
+    border: 2px solid #00f0ff;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: bold;
+    color: #003366;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.9);
+    position: relative;
+    overflow: hidden;
+    animation: pop 2s infinite alternate;
+  }
 
-    .metric-box:nth-child(2) {
-      animation-delay: 0.3s;
-    }
+  .metric-box:nth-child(2) {
+    animation-delay: 0.3s;
+  }
 
-    .metric-box:nth-child(3) {
-      animation-delay: 0.6s;
-    }
+  .metric-box:nth-child(3) {
+    animation-delay: 0.6s;
+  }
 
-    @keyframes pop {
-      0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
-      50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(0, 240, 255, 1); }
-      100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
-    }
+  @keyframes pop {
+    0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
+    50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(0, 240, 255, 1); }
+    100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
+  }
 
-    .metric-box .title {
-      font-size: 16px;
-      font-weight: bold;
-      text-shadow: 0 0 3px #00f0ff, 0 0 6px #00f0ff;
-      margin-bottom: 6px;
-      letter-spacing: 0.5px;
-    }
+  .metric-box .title {
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 0 0 3px #00f0ff, 0 0 6px #00f0ff;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
 
-    .metric-box .agent {
-      font-size: 14px;
-      margin: 3px 0;
-      text-shadow: 0 0 2px #ffffff, 0 0 4px #00bfff;
-    }
+  .metric-box .agent {
+    font-size: 14px;
+    margin: 3px 0;
+    text-shadow: 0 0 2px #ffffff, 0 0 4px #00bfff;
+  }
 
-    .shift-container {
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      flex: 1 1 auto;
-      overflow: hidden;
-    }
+  .shift-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
 
-    .shift-table {
-      background: #b3e5ff;
-      border-radius: 6px;
-      padding: 6px;
-      flex: 1;
-      min-width: 45%;
-      box-shadow: 0 0 8px #00bfff88;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      color: #003366;
-      overflow: hidden;
-    }
+  .shift-table {
+    background: #b3e5ff;
+    border-radius: 6px;
+    padding: 6px;
+    flex: 1;
+    min-width: 45%;
+    box-shadow: 0 0 8px #00bfff88;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: #003366;
+    overflow: hidden;
+  }
 
-    .shift-table h3 {
-      margin: 3px 0 6px;
-      font-size: 13px;
-      color: #0077cc;
-    }
+  .shift-table h3 {
+    margin: 3px 0 6px;
+    font-size: 13px;
+    color: #0077cc;
+  }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      background: #e6f7ff;
-      flex: 1 1 auto;
-      color: #003366;
-      overflow: hidden;
-    }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    background: #e6f7ff;
+    flex: 1 1 auto;
+    color: #003366;
+    overflow: hidden;
+  }
 
-    thead th {
-      background: #00bfff;
-      padding: 4px;
-      font-size: 11px;
-      color: #003366;
-      cursor: pointer;
-      border-radius: 4px;
-    }
+  thead th {
+    background: #00bfff;
+    padding: 4px;
+    font-size: 11px;
+    color: #003366;
+    cursor: pointer;
+    border-radius: 4px;
+  }
 
-    tbody td {
-      padding: 3px 2px;
-      text-align: center;
-      border-bottom: 1px solid #00aaff;
-    }
+  tbody td {
+    padding: 3px 2px;
+    text-align: center;
+    border-bottom: 1px solid #00aaff;
+  }
 
-    tbody tr:nth-child(odd) {
-      background-color: #cceeff;
-    }
+  tbody tr:nth-child(odd) {
+    background-color: #cceeff;
+  }
 
-    tbody tr:last-child {
-      background-color: #00bfff;
-      font-weight: bold;
-      color: #ffffff;
-    }
+  tbody tr:last-child {
+    background-color: #00bfff;
+    font-weight: bold;
+    color: #ffffff;
+  }
 
-    tbody tr:hover {
-      background-color: #99e6ff;
-    }
+  tbody tr:hover {
+    background-color: #99e6ff;
+  }
 
-    /* Password form styles */
-    #loginForm {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-    }
-
-    #loginForm input {
-      padding: 10px;
-      font-size: 16px;
-      margin: 10px;
-      border: none;
-      border-radius: 5px;
-    }
-
-    #loginForm button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #0077cc;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    #passwordToggle {
-      cursor: pointer;
-      color: #00bfff;
-      font-size: 14px;
-      text-decoration: underline;
-      margin-top: 5px;
-    }
-  </style>
+  /* Add color to the password input field */
+  input[type="password"], input[type="text"] {
+    color: black;
+  }
+</style>
 </head>
 <body>
 
-<!-- Password Protection Form -->
-<div id="loginForm">
-  <h2>Enter Password</h2>
-  <input type="password" id="passwordInput" placeholder="Enter password">
-  <button id="submitButton">Submit</button>
-  <span id="passwordToggle">Show Password</span>
+<!-- Password Protection Popup -->
+<div id="passwordPopup" style="display: none;">
+  <div style="text-align: center; background-color: #ffffff; padding: 20px; border: 2px solid #0077cc; border-radius: 12px; width: 300px; margin: 100px auto;">
+    <h3>Enter Password</h3>
+    <input type="password" id="password" placeholder="Password" style="padding: 8px; width: 80%; margin-bottom: 10px;">
+    <input type="checkbox" id="showPassword"> Show Password
+    <br>
+    <button onclick="validatePassword()" style="padding: 8px 15px; background-color: #0077cc; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;">Submit</button>
+  </div>
 </div>
 
-<!-- Agent Dashboard -->
-<div id="dashboard" style="display: none;">
-  <h2>Agent Dashboard - Compact View</h2>
-  <div id="lastUpdated"></div>
-  <div style="text-align:center;">
-    <select id="monthDropdown"></select>
-  </div>
+<h2>Agent Dashboard - Compact View</h2>
+<div id="lastUpdated"></div>
+<div style="text-align:center;">
+  <select id="monthDropdown"></select>
+</div>
 
-  <div class="top-row">
-    <div id="topSok" class="metric-box"></div>
-    <div id="topProfit" class="metric-box"></div>
-    <div id="topCalls" class="metric-box"></div>
-  </div>
+<div class="top-row">
+  <div id="topSok" class="metric-box"></div>
+  <div id="topProfit" class="metric-box"></div>
+  <div id="topCalls" class="metric-box"></div>
+</div>
 
-  <div class="shift-container">
-    <div class="shift-table">
-      <h3>Morning Shift</h3>
-      <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
-    </div>
-    <div class="shift-table">
-      <h3>Night Shift</h3>
-      <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
-    </div>
+<div class="shift-container">
+  <div class="shift-table">
+    <h3>Morning Shift</h3>
+    <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
+  </div>
+  <div class="shift-table">
+    <h3>Night Shift</h3>
+    <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
   </div>
 </div>
 
 <script>
-  const correctPassword = "Blauda123";  // Correct password
-  const submitButton = document.getElementById('submitButton');
-  const passwordInput = document.getElementById('passwordInput');
-  const loginForm = document.getElementById('loginForm');
-  const dashboard = document.getElementById('dashboard');
-  const passwordToggle = document.getElementById('passwordToggle');
-  
-  // Toggle password visibility
-  passwordToggle.addEventListener('click', () => {
-    const type = passwordInput.type === 'password' ? 'text' : 'password';
-    passwordInput.type = type;
-    passwordToggle.textContent = type === 'password' ? 'Show Password' : 'Hide Password';
-  });
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
 
-  // Handle form submission
-  submitButton.addEventListener('click', function(event) {
-    event.preventDefault();  // Prevent form from submitting and page reload
-    const enteredPassword = passwordInput.value;
+const monthDropdown = document.getElementById('monthDropdown');
+const topSok = document.getElementById('topSok');
+const topProfit = document.getElementById('topProfit');
+const topCalls = document.getElementById('topCalls');
+const morningDiv = document.getElementById('morningTable');
+const nightDiv = document.getElementById('nightTable');
+const lastUpdated = document.getElementById('lastUpdated');
 
-    if (enteredPassword === correctPassword) {
-      loginForm.style.display = 'none';  // Hide the login form
-      dashboard.style.display = 'block';  // Show the dashboard
-      loadData();  // Load the data for the dashboard
+let allData = [], headers = [], currentMonth = "ALL";
+const validPassword = "blauda123";  // Replace with your actual password
+
+// Show the password popup on page load
+showPasswordPopup();
+
+function showPasswordPopup() {
+  document.getElementById('passwordPopup').style.display = 'block';
+}
+
+function validatePassword() {
+  const enteredPassword = document.getElementById('password').value;
+  if (enteredPassword === validPassword) {
+    document.getElementById('passwordPopup').style.display = 'none';
+    loadData();
+  } else {
+    alert('Incorrect password');
+  }
+}
+
+document.getElementById('showPassword').addEventListener('change', function() {
+  const passwordField = document.getElementById('password');
+  passwordField.type = this.checked ? 'text' : 'password';
+});
+
+async function loadData() {
+  const response = await fetch(CSV_URL);
+  const text = await response.text();
+  processCSV(text);
+  lastUpdated.textContent = "Last updated: " + new Date().toLocaleString();
+}
+
+function processCSV(text) {
+  const lines = text.trim().split('\n').map(parseCSVLine);
+  headers = lines[0].map(h => h.trim());
+  allData = lines.slice(1);
+
+  populateMonths();
+  displayData(currentMonth);
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let inQuotes = false, value = '';
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"' && line[i - 1] !== '\\') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(value.trim());
+      value = '';
     } else {
-      alert('Incorrect password! Try again.');
+      value += char;
     }
+  }
+  result.push(value.trim());
+  return result;
+}
+
+function populateMonths() {
+  const monthIndex = headers.indexOf('Month');
+  const monthSet = new Set(allData.map(row => row[monthIndex] || ""));
+  const months = Array.from(monthSet);
+
+  months.forEach(month => {
+    const option = document.createElement('option');
+    option.value = month;
+    option.textContent = month;
+    monthDropdown.appendChild(option);
   });
 
-  // CSV URL
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
+  // Default to latest month ("Aug-25" as the latest in data)
+  if (months.length > 0) {
+    monthDropdown.value = "Aug-25";  // Set default month
+    currentMonth = "Aug-25";  // Set default month
+  }
+}
+
+function displayData(month) {
+  const monthIndex = headers.indexOf('Month');
+  const filteredData = month === "ALL" ? allData : allData.filter(row => row[monthIndex] === month);
+
+  const morningData = filteredData.filter(row => row[headers.indexOf('Shift')] === 'Morning');
+  const nightData = filteredData.filter(row => row[headers.indexOf('Shift')] === 'Night');
+
+  renderTable(morningDiv, morningData);
+  renderTable(nightDiv, nightData);
+
+  updateMetrics(filteredData);
+}
+
+function renderTable(container, data) {
+  const table = document.createElement('table');
+  const headerRow = document.createElement('tr');
   
-  const monthDropdown = document.getElementById('monthDropdown');
-  const topSok = document.getElementById('topSok');
-  const topProfit = document.getElementById('topProfit');
-  const topCalls = document.getElementById('topCalls');
-  const morningDiv = document.getElementById('morningTable');
-  const nightDiv = document.getElementById('nightTable');
-  
-  let headers, allData, currentMonth;
-  
-  // Load the CSV data
-  async function loadData() {
-    const response = await fetch(CSV_URL);
-    const data = await response.text();
-    parseCSV(data);
-  }
+  headers.forEach(header => {
+    const th = document.createElement('th');
+    th.textContent = header;
+    headerRow.appendChild(th);
+  });
 
-  function parseCSV(data) {
-    const lines = data.split('\n').map(line => line.split(','));
-    headers = lines[0].map(h => h ? h.trim() : "");
-    allData = lines.slice(1);
-    populateMonths();
-    displayData(currentMonth);
-  }
+  table.appendChild(headerRow);
 
-  function populateMonths() {
-    const monthIndex = headers.indexOf("Month");
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const monthPairs = Array.from(new Set(allData.map(row => {
-      const raw = row[monthIndex];
-      if (!raw) return null;
-      let dateObj;
-      if (!isNaN(Date.parse(raw))) dateObj = new Date(raw);
-      else {
-        const parts = raw.split(/[-\\/]/);
-        if (parts.length >= 3) {
-          const day = parseInt(parts[0], 10);
-          const monthIdx = isNaN(parts[1]) ? monthNames.findIndex(n => n.toLowerCase() === parts[1].slice(0, 3).toLowerCase()) : parseInt(parts[1], 10) - 1;
-          const year = parseInt(parts[2], 10);
-          dateObj = new Date(year, monthIdx, day);
-        }
-      }
-      if (dateObj && !isNaN(dateObj)) {
-        const formatted = monthNames[dateObj.getMonth()] + '-' + dateObj.getFullYear().toString().slice(2);
-        return JSON.stringify({ raw, formatted });
-      }
-      return null;
-    }).filter(Boolean)));
-
-    const uniquePairs = monthPairs.map(str => JSON.parse(str));
-    const latestMonth = uniquePairs.sort((a, b) => new Date(b.raw) - new Date(a.raw))[0]?.formatted;
-
-    monthDropdown.innerHTML = "<option value='ALL'>All Months</option>" + uniquePairs.map(p => `<option value="${p.raw}">${p.formatted}</option>`).join('');
-    currentMonth = latestMonth;  // Set default to latest month
-    monthDropdown.value = latestMonth;  // Select the latest month
-    monthDropdown.addEventListener("change", e => displayData(e.target.value));
-  }
-
-  function displayData(month) {
-    currentMonth = month;
-    const i = {
-      month: headers.indexOf("Month"),
-      agent: headers.indexOf("Sales Agent"),
-      shift: headers.indexOf("Shift"),
-      sok: headers.indexOf("SOK Count"),
-      reserved: headers.indexOf("Reserved Count"),
-      calls: headers.indexOf("Total Calls"),
-      talk: headers.indexOf("Total Talktime"),
-      profit: headers.indexOf("Estimated SOK Profit")
-    };
-
-    const data = month === "ALL" ? allData : allData.filter(r => r[i.month] === month);
-    const grouped = { morning: {}, night: {} };
-    const topData = {};
-
-    data.forEach(r => {
-      const agent = r[i.agent], shiftRaw = (r[i.shift] || "").toLowerCase();
-      const shift = shiftRaw.includes("morning") ? "morning" : "night";
-      const sok = +r[i.sok] || 0, reserved = +r[i.reserved] || 0, calls = +r[i.calls] || 0, profit = +r[i.profit] || 0;
-      let talk = 0;
-      const talkRaw = (r[i.talk] || "").toString();
-      if (talkRaw.includes(":")) {
-        const t = talkRaw.split(":").map(Number);
-        talk = t.length === 3 ? t[0] * 3600 + t[1] * 60 + t[2] : t[0] * 60 + t[1];
-      } else talk = +talkRaw || 0;
-
-      if (!grouped[shift][agent]) grouped[shift][agent] = { agent, sokTotal: 0, reservedTotal: 0, callsTotal: 0, talkTotal: 0, profitTotal: 0 };
-      const g = grouped[shift][agent];
-      g.sokTotal += sok; g.reservedTotal += reserved; g.callsTotal += calls; g.talkTotal += talk; g.profitTotal += profit;
-
-      if (!topData[agent]) topData[agent] = { sokTotal: 0, callsTotal: 0, profitTotal: 0 };
-      topData[agent].sokTotal += sok; topData[agent].callsTotal += calls; topData[agent].profitTotal += profit;
+  data.forEach(row => {
+    const rowElement = document.createElement('tr');
+    row.forEach(cell => {
+      const td = document.createElement('td');
+      td.textContent = cell;
+      rowElement.appendChild(td);
     });
+    table.appendChild(rowElement);
+  });
 
-    renderShift(Object.values(grouped.morning), morningDiv);
-    renderShift(Object.values(grouped.night), nightDiv);
-    renderTopBoxes(topData);
-  }
+  container.innerHTML = '';  // Clear any existing content
+  container.appendChild(table);
+}
 
-  function renderShift(data, container) {
-    const total = { sokTotal: 0, reservedTotal: 0, callsTotal: 0, talkTotal: 0, profitTotal: 0 };
-    data.forEach(d => { for (let k in total) total[k] += d[k]; });
-    data.push({ agent: "Grand Total", ...total });
+function updateMetrics(data) {
+  const sok = data.filter(row => row[headers.indexOf('SOK')] !== "").length;
+  const profit = data.reduce((total, row) => total + parseFloat(row[headers.indexOf('Profit')] || 0), 0);
+  const calls = data.reduce((total, row) => total + parseInt(row[headers.indexOf('Calls')] || 0), 0);
 
-    const headersRow = ["Sales Agent", "SOK Count", "Reserved Count", "Total Calls", "Total Talktime", "Estimated SOK Profit"];
-    let html = "<table><thead><tr>" + headersRow.map(h => `<th>${h}</th>`).join('') + "</tr></thead><tbody>";
-    data.forEach(d => {
-      html += `<tr>
-        <td data-value="${d.agent}">${d.agent}</td>
-        <td data-value="${d.sokTotal}">${d.sokTotal}</td>
-        <td data-value="${d.reservedTotal}">${d.reservedTotal}</td>
-        <td data-value="${d.callsTotal}">${d.callsTotal}</td>
-        <td data-value="${d.talkTotal}">${formatTime(d.talkTotal)}</td>
-        <td data-value="${Math.round(d.profitTotal)}">¥${Math.round(d.profitTotal)}</td>
-      </tr>`;
-    });
-    html += "</tbody></table>";
-    container.innerHTML = html;
-    enableSorting(container);
-  }
+  topSok.innerHTML = `<div class="title">SOK</div><div class="agent">${sok}</div>`;
+  topProfit.innerHTML = `<div class="title">Profit</div><div class="agent">${profit}</div>`;
+  topCalls.innerHTML = `<div class="title">Calls</div><div class="agent">${calls}</div>`;
+}
 
-  function renderTopBoxes(data) {
-    function buildBox(title, key) {
-      const sorted = Object.entries(data).map(([agent, v]) => ({ agent, value: v[key] || 0 })).sort((a, b) => b.value - a.value).slice(0, 3);
-      return `<div><div class="title">${title}</div>` + sorted.map(t => `<div class="agent">${t.agent}: ${Math.round(t.value)}</div>`).join("") + "</div>";
-    }
-    topSok.innerHTML = buildBox("Highest SOK - Top3", "sokTotal");
-    topProfit.innerHTML = buildBox("Highest Profit - Top3", "profitTotal");
-    topCalls.innerHTML = buildBox("Highest Calls - Top3", "callsTotal");
-  }
-
-  function enableSorting(container) {
-    const table = container.querySelector("table");
-    if (!table) return;
-    const tbody = table.querySelector("tbody");
-    const headers = table.querySelectorAll("th");
-    headers.forEach((th, idx) => {
-      let asc = true;
-      th.onclick = () => {
-        const rows = Array.from(tbody.querySelectorAll("tr"));
-        const totalRow = rows.pop();
-        rows.sort((a, b) => {
-          const aVal = a.cells[idx].dataset.value || a.cells[idx].innerText;
-          const bVal = b.cells[idx].dataset.value || b.cells[idx].innerText;
-          const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ""));
-          const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ""));
-          if (!isNaN(aNum) && !isNaN(bNum)) return asc ? aNum - bNum : bNum - aNum;
-          else return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-        });
-        tbody.innerHTML = "";
-        rows.forEach(r => tbody.appendChild(r));
-        tbody.appendChild(totalRow);
-        asc = !asc;
-      };
-    });
-  }
-
-  function formatTime(sec) {
-    if (!sec) return "00:00";
-    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
-    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  }
 </script>
-
 </body>
 </html>
