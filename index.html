@@ -122,6 +122,8 @@
     const morningTable = document.getElementById('morningTable');
     const nightTable = document.getElementById('nightTable');
 
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
+
     // Handle form submission
     submitButton.addEventListener('click', function(event) {
       event.preventDefault();  // Prevent form from submitting and page reload
@@ -136,40 +138,78 @@
       }
     });
 
-    // Function to load dashboard data
-    function loadDashboardData() {
-      // Simulating data fetch (replace with actual data fetch logic)
-      setTimeout(() => {
-        topSok.textContent = "Top SOK: Agent123 - 98";
-        topProfit.textContent = "Top Profit: Agent456 - $5000";
-        topCalls.textContent = "Top Calls: Agent789 - 150 Calls";
-
-        // Load shift tables
-        loadShiftData();
-      }, 1000);
+    // Function to fetch CSV data
+    async function fetchCSVData() {
+      const response = await fetch(CSV_URL);
+      const text = await response.text();
+      return processCSV(text);
     }
 
-    // Function to load shift data (replace with actual data fetch logic)
-    function loadShiftData() {
-      const morningShiftData = [
-        ["Agent A", "10", "5", "50", "20:00", "$200"],
-        ["Agent B", "15", "8", "60", "22:00", "$250"],
-        ["Agent C", "8", "3", "40", "18:00", "$150"]
-      ];
+    // Process the CSV data and extract required information
+    function processCSV(csvText) {
+      const rows = csvText.trim().split("\n").map(row => row.split(","));
+      const headers = rows[0];
+      const data = rows.slice(1);
+      return { headers, data };
+    }
 
-      const nightShiftData = [
-        ["Agent D", "12", "7", "55", "23:00", "$220"],
-        ["Agent E", "18", "10", "70", "20:30", "$300"],
-        ["Agent F", "9", "4", "45", "21:00", "$180"]
-      ];
+    // Function to load dashboard data
+    async function loadDashboardData() {
+      const { headers, data } = await fetchCSVData();
 
+      const monthIndex = headers.indexOf("Month");
+      const sokIndex = headers.indexOf("SOK Count");
+      const profitIndex = headers.indexOf("Estimated SOK Profit");
+      const callsIndex = headers.indexOf("Total Calls");
+
+      const currentMonth = "Aug-25";  // Default to latest month (Aug-25)
+
+      const morningShiftData = [];
+      const nightShiftData = [];
+
+      data.forEach(row => {
+        const month = row[monthIndex];
+        const sok = parseInt(row[sokIndex]) || 0;
+        const profit = parseFloat(row[profitIndex]) || 0;
+        const calls = parseInt(row[callsIndex]) || 0;
+        const shift = row[headers.indexOf("Shift")];
+
+        if (shift.toLowerCase().includes("morning")) {
+          morningShiftData.push([row[headers.indexOf("Sales Agent")], sok, profit, calls]);
+        } else {
+          nightShiftData.push([row[headers.indexOf("Sales Agent")], sok, profit, calls]);
+        }
+      });
+
+      renderTopMetrics(morningShiftData, nightShiftData);
       renderShiftTable(morningShiftData, morningTable);
       renderShiftTable(nightShiftData, nightTable);
     }
 
-    // Function to render shift table
+    // Function to render the top metrics (SOK, Profit, Calls)
+    function renderTopMetrics(morningShiftData, nightShiftData) {
+      const topSokAgent = getTopAgent(morningShiftData.concat(nightShiftData), 1);  // SOK is at index 1
+      const topProfitAgent = getTopAgent(morningShiftData.concat(nightShiftData), 2);  // Profit is at index 2
+      const topCallsAgent = getTopAgent(morningShiftData.concat(nightShiftData), 3);  // Calls is at index 3
+
+      topSok.textContent = `Top SOK: ${topSokAgent[0]} - ${topSokAgent[1]} SOK`;
+      topProfit.textContent = `Top Profit: ${topProfitAgent[0]} - $${topProfitAgent[2]}`;
+      topCalls.textContent = `Top Calls: ${topCallsAgent[0]} - ${topCallsAgent[3]} Calls`;
+    }
+
+    // Function to find the top agent for a specific metric
+    function getTopAgent(data, index) {
+      return data.reduce((topAgent, row) => {
+        if (row[index] > topAgent[index]) {
+          return row;
+        }
+        return topAgent;
+      }, data[0]);
+    }
+
+    // Function to render the shift table
     function renderShiftTable(data, tableElement) {
-      const headers = ["Agent", "SOK Count", "Reserved Count", "Total Calls", "Total Talktime", "Estimated SOK Profit"];
+      const headers = ["Sales Agent", "SOK Count", "Estimated SOK Profit", "Total Calls"];
       const thead = document.createElement('thead');
       const headerRow = document.createElement('tr');
       
