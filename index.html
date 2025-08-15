@@ -1,366 +1,335 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Agent Dashboard</title>
-<style>
-  body {
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: #e0f7ff;
-    color: #003366;
-    margin: 0;
-    user-select: none;
-    font-size: 11px;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-  }
+  <meta charset="UTF-8">
+  <title>Agent Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: #e0f7ff;
+      color: #003366;
+      margin: 0;
+      user-select: none;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
 
-  h2 {
-    text-align: center;
-    color: #0077cc;
-    margin: 5px 0;
-    font-size: 18px;
-  }
+    h2 {
+      text-align: center;
+      color: #0077cc;
+      margin: 5px 0;
+      font-size: 18px;
+    }
 
-  #lastUpdated {
-    text-align: center;
-    font-size: 10px;
-    color: #004d80;
-    margin: 2px 0;
-  }
+    #lastUpdated {
+      text-align: center;
+      font-size: 10px;
+      color: #004d80;
+      margin: 2px 0;
+    }
 
-  select {
-    padding: 3px 6px;
-    font-size: 11px;
-    border-radius: 4px;
-    border: 1px solid #00bfff;
-    background: #b3e5ff;
-    color: #003366;
-    margin-bottom: 6px;
-  }
+    select {
+      padding: 3px 6px;
+      font-size: 11px;
+      border-radius: 4px;
+      border: 1px solid #00bfff;
+      background: #b3e5ff;
+      color: #003366;
+      margin-bottom: 6px;
+    }
 
-  .top-row {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
+    .top-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
 
-  .metric-box {
-    flex: 0 0 32%;
-    background: linear-gradient(135deg, #00bfff, #1ec5ff);
-    border: 2px solid #00f0ff;
-    padding: 12px;
-    border-radius: 12px;
-    text-align: center;
-    font-weight: bold;
-    color: #003366;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.9);
-    position: relative;
-    overflow: hidden;
-    animation: pop 2s infinite alternate;
-  }
+    .metric-box {
+      flex: 0 0 32%;
+      background: linear-gradient(135deg, #00bfff, #1ec5ff);
+      border: 2px solid #00f0ff;
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: bold;
+      color: #003366;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.9);
+      position: relative;
+      overflow: hidden;
+      animation: pop 2s infinite alternate;
+    }
 
-  .metric-box:nth-child(2) {
-    animation-delay: 0.3s;
-  }
+    .metric-box:nth-child(2) {
+      animation-delay: 0.3s;
+    }
 
-  .metric-box:nth-child(3) {
-    animation-delay: 0.6s;
-  }
+    .metric-box:nth-child(3) {
+      animation-delay: 0.6s;
+    }
 
-  @keyframes pop {
-    0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
-    50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(0, 240, 255, 1); }
-    100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
-  }
+    @keyframes pop {
+      0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
+      50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(0, 240, 255, 1); }
+      100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
+    }
 
-  .metric-box .title {
-    font-size: 16px;
-    font-weight: bold;
-    text-shadow: 0 0 3px #00f0ff, 0 0 6px #00f0ff;
-    margin-bottom: 6px;
-    letter-spacing: 0.5px;
-  }
+    .metric-box .title {
+      font-size: 16px;
+      font-weight: bold;
+      text-shadow: 0 0 3px #00f0ff, 0 0 6px #00f0ff;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
 
-  .metric-box .agent {
-    font-size: 14px;
-    margin: 3px 0;
-    text-shadow: 0 0 2px #ffffff, 0 0 4px #00bfff;
-  }
+    .metric-box .agent {
+      font-size: 14px;
+      margin: 3px 0;
+      text-shadow: 0 0 2px #ffffff, 0 0 4px #00bfff;
+    }
 
-  .shift-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 6px;
-    flex: 1 1 auto;
-    overflow: hidden;
-  }
+    .shift-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      flex: 1 1 auto;
+      overflow: hidden;
+    }
 
-  .shift-table {
-    background: #b3e5ff;
-    border-radius: 6px;
-    padding: 6px;
-    flex: 1;
-    min-width: 45%;
-    box-shadow: 0 0 8px #00bfff88;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    color: #003366;
-    overflow: hidden;
-  }
+    .shift-table {
+      background: #b3e5ff;
+      border-radius: 6px;
+      padding: 6px;
+      flex: 1;
+      min-width: 45%;
+      box-shadow: 0 0 8px #00bfff88;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      color: #003366;
+      overflow: hidden;
+    }
 
-  .shift-table h3 {
-    margin: 3px 0 6px;
-    font-size: 13px;
-    color: #0077cc;
-  }
+    .shift-table h3 {
+      margin: 3px 0 6px;
+      font-size: 13px;
+      color: #0077cc;
+    }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11px;
-    background: #e6f7ff;
-    flex: 1 1 auto;
-    color: #003366;
-    overflow: hidden;
-  }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      background: #e6f7ff;
+      flex: 1 1 auto;
+      color: #003366;
+      overflow: hidden;
+    }
 
-  thead th {
-    background: #00bfff;
-    padding: 4px;
-    font-size: 11px;
-    color: #003366;
-    cursor: pointer;
-    border-radius: 4px;
-  }
+    thead th {
+      background: #00bfff;
+      padding: 4px;
+      font-size: 11px;
+      color: #003366;
+      cursor: pointer;
+      border-radius: 4px;
+    }
 
-  tbody td {
-    padding: 3px 2px;
-    text-align: center;
-    border-bottom: 1px solid #00aaff;
-  }
+    tbody td {
+      padding: 3px 2px;
+      text-align: center;
+      border-bottom: 1px solid #00aaff;
+    }
 
-  tbody tr:nth-child(odd) {
-    background-color: #cceeff;
-  }
+    tbody tr:nth-child(odd) {
+      background-color: #cceeff;
+    }
 
-  tbody tr:last-child {
-    background-color: #00bfff;
-    font-weight: bold;
-    color: #ffffff;
-  }
+    tbody tr:last-child {
+      background-color: #00bfff;
+      font-weight: bold;
+      color: #ffffff;
+    }
 
-  tbody tr:hover {
-    background-color: #99e6ff;
-  }
-</style>
+    tbody tr:hover {
+      background-color: #99e6ff;
+    }
+  </style>
 </head>
 <body>
-<h2>Agent Dashboard - Compact View</h2>
-<div id="lastUpdated"></div>
-<div style="text-align:center;">
-  <select id="monthDropdown"></select>
-</div>
+  <!-- Password protection -->
+  <script>
+    var password = prompt("Enter password to access this site:");
+    if (password !== "Blauda123") {
+      document.body.innerHTML = "<h1>Access Denied</h1>";
+      document.body.style.textAlign = "center";
+    }
+  </script>
 
-<div class="top-row">
-  <div id="topSok" class="metric-box"></div>
-  <div id="topProfit" class="metric-box"></div>
-  <div id="topCalls" class="metric-box"></div>
-</div>
-
-<div class="shift-container">
-  <div class="shift-table">
-    <h3>Morning Shift</h3>
-    <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
+  <h2>Agent Dashboard - Compact View</h2>
+  <div id="lastUpdated"></div>
+  <div style="text-align:center;">
+    <select id="monthDropdown"></select>
   </div>
-  <div class="shift-table">
-    <h3>Night Shift</h3>
-    <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
+
+  <div class="top-row">
+    <div id="topSok" class="metric-box"></div>
+    <div id="topProfit" class="metric-box"></div>
+    <div id="topCalls" class="metric-box"></div>
   </div>
-</div>
 
-<script>
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
+  <div class="shift-container">
+    <div class="shift-table">
+      <h3>Morning Shift</h3>
+      <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
+    </div>
+    <div class="shift-table">
+      <h3>Night Shift</h3>
+      <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
+    </div>
+  </div>
 
-const monthDropdown = document.getElementById('monthDropdown');
-const topSok = document.getElementById('topSok');
-const topProfit = document.getElementById('topProfit');
-const topCalls = document.getElementById('topCalls');
-const morningDiv = document.getElementById('morningTable');
-const nightDiv = document.getElementById('nightTable');
-const lastUpdated = document.getElementById('lastUpdated');
+  <script>
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
+    
+    const monthDropdown = document.getElementById('monthDropdown');
+    const topSok = document.getElementById('topSok');
+    const topProfit = document.getElementById('topProfit');
+    const topCalls = document.getElementById('topCalls');
+    const morningDiv = document.getElementById('morningTable');
+    const nightDiv = document.getElementById('nightTable');
+    const lastUpdated = document.getElementById('lastUpdated');
+    
+    let allData = [], headers = [], currentMonth = "ALL";
+    let latestMonth = "ALL"; // Variable to hold the latest month
 
-let allData = [], headers = [], currentMonth = "ALL";
+    async function loadData() {
+      const response = await fetch(CSV_URL);
+      const text = await response.text();
+      processCSV(text);
+      lastUpdated.textContent = "Last updated: " + new Date().toLocaleString();
+    }
 
-async function loadData() {
-  const response = await fetch(CSV_URL);
-  const text = await response.text();
-  processCSV(text);
-  lastUpdated.textContent = "Last updated: " + new Date().toLocaleString();
-}
+    function processCSV(text) {
+      const lines = text.trim().split('\n').map(parseCSVLine);
+      headers = lines[0].map(h => h ? h.trim() : "");
+      allData = lines.slice(1);
+      populateMonths();
+      displayData(currentMonth);
+    }
 
-function processCSV(text) {
-  const lines = text.trim().split('\n').map(parseCSVLine);
-  headers = lines[0].map(h => h ? h.trim() : "");
-  allData = lines.slice(1);
-  populateMonths();
-  displayData(currentMonth);
-}
-
-function parseCSVLine(line) {
-  const result = [];
-  let inQuotes = false, value = '';
-  for (let i=0;i<line.length;i++){
-    const c=line[i];
-    if(c=='"' && line[i+1]=='"'){value+='"'; i++;} 
-    else if(c=='"') inQuotes=!inQuotes;
-    else if(c==',' && !inQuotes){ result.push(value.trim()); value='';}
-    else value+=c;
-  }
-  result.push(value.trim());
-  return result;
-}
-
-function populateMonths() {
-  const monthIndex = headers.indexOf("Month");
-  const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const monthPairs = Array.from(new Set(allData.map(row=>{
-    const raw=row[monthIndex]; if(!raw) return null;
-    let dateObj;
-    if(!isNaN(Date.parse(raw))) dateObj=new Date(raw);
-    else {
-      const parts=raw.split(/[-\\/]/);
-      if(parts.length>=3){
-        const day=parseInt(parts[0],10);
-        const monthIdx=isNaN(parts[1])?monthNames.findIndex(n=>n.toLowerCase()===parts[1].slice(0,3).toLowerCase()):parseInt(parts[1],10)-1;
-        const year=parseInt(parts[2],10);
-        dateObj=new Date(year,monthIdx,day);
+    function parseCSVLine(line) {
+      const result = [];
+      let inQuotes = false, value = '';
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c == '"' && line[i + 1] == '"') {
+          value += '"';
+          i++;
+        } else if (c == '"') inQuotes = !inQuotes;
+        else if (c == ',' && !inQuotes) {
+          result.push(value.trim());
+          value = '';
+        } else value += c;
       }
+      result.push(value.trim());
+      return result;
     }
-    if(dateObj&&!isNaN(dateObj)){
-      const formatted=monthNames[dateObj.getMonth()]+'-'+dateObj.getFullYear().toString().slice(2);
-      return JSON.stringify({raw:raw,formatted:formatted});
-    }
-    return null;
-  }).filter(Boolean)));
 
-  const uniquePairs=monthPairs.map(str=>JSON.parse(str));
-  monthDropdown.innerHTML=`<option value="ALL">All Months</option>`+
-    uniquePairs.map(p=>`<option value="${p.raw}">${p.formatted}</option>`).join('');
-  monthDropdown.addEventListener("change", e=>displayData(e.target.value));
-}
+    function populateMonths() {
+      const monthIndex = headers.indexOf("Month");
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      const monthPairs = Array.from(new Set(allData.map(row => {
+        const raw = row[monthIndex];
+        if (!raw) return null;
+        
+        let dateObj;
+        if (!isNaN(Date.parse(raw))) dateObj = new Date(raw);
+        else {
+          const parts = raw.split(/[-\\/]/);
+          if (parts.length >= 3) {
+            const day = parseInt(parts[2]);
+            const month = parseInt(parts[1]) - 1;
+            const year = parseInt(parts[0]);
+            dateObj = new Date(year, month, day);
+          }
+        }
+        return dateObj ? monthNames[dateObj.getMonth()] : null;
+      })).filter(Boolean));
 
-function displayData(month){
-  currentMonth=month;
-  const i={
-    month:headers.indexOf("Month"),
-    agent:headers.indexOf("Sales Agent"),
-    shift:headers.indexOf("Shift"),
-    sok:headers.indexOf("SOK Count"),
-    reserved:headers.indexOf("Reserved Count"),
-    calls:headers.indexOf("Total Calls"),
-    talk:headers.indexOf("Total Talktime"),
-    profit:headers.indexOf("Estimated SOK Profit")
-  };
-
-  const data = month==="ALL"?allData:allData.filter(r=>r[i.month]===month);
-  const grouped={morning:{},night:{}};
-  const topData={};
-
-  data.forEach(r=>{
-    const agent=r[i.agent], shiftRaw=(r[i.shift]||"").toLowerCase();
-    const shift=shiftRaw.includes("morning")?"morning":"night";
-    const sok=+r[i.sok]||0, reserved=+r[i.reserved]||0, calls=+r[i.calls]||0, profit=+r[i.profit]||0;
-    let talk=0;
-    const talkRaw=(r[i.talk]||"").toString();
-    if(talkRaw.includes(":")){
-      const t=talkRaw.split(":").map(Number);
-      talk=t.length===3?t[0]*3600+t[1]*60+t[2]:t[0]*60+t[1];
-    } else talk=+talkRaw||0;
-
-    if(!grouped[shift][agent]) grouped[shift][agent]={agent,sokTotal:0,reservedTotal:0,callsTotal:0,talkTotal:0,profitTotal:0};
-    const g=grouped[shift][agent];
-    g.sokTotal+=sok; g.reservedTotal+=reserved; g.callsTotal+=calls; g.talkTotal+=talk; g.profitTotal+=profit;
-
-    if(!topData[agent]) topData[agent]={sokTotal:0,callsTotal:0,profitTotal:0};
-    topData[agent].sokTotal+=sok; topData[agent].callsTotal+=calls; topData[agent].profitTotal+=profit;
-  });
-
-  renderShift(Object.values(grouped.morning), morningDiv);
-  renderShift(Object.values(grouped.night), nightDiv);
-  renderTopBoxes(topData);
-}
-
-function renderShift(data, container){
-  const total={sokTotal:0,reservedTotal:0,callsTotal:0,talkTotal:0,profitTotal:0};
-  data.forEach(d=>{for(let k in total) total[k]+=d[k];});
-  data.push({agent:"Grand Total",...total});
-
-  const headersRow=["Sales Agent","SOK Count","Reserved Count","Total Calls","Total Talktime","Estimated SOK Profit"];
-  let html="<table><thead><tr>"+headersRow.map(h=>`<th>${h}</th>`).join('')+"</tr></thead><tbody>";
-  data.forEach(d=>{
-    html+=`<tr>
-      <td data-value="${d.agent}">${d.agent}</td>
-      <td data-value="${d.sokTotal}">${d.sokTotal}</td>
-      <td data-value="${d.reservedTotal}">${d.reservedTotal}</td>
-      <td data-value="${d.callsTotal}">${d.callsTotal}</td>
-      <td data-value="${d.talkTotal}">${formatTime(d.talkTotal)}</td>
-      <td data-value="${Math.round(d.profitTotal)}">¥${Math.round(d.profitTotal)}</td>
-    </tr>`;
-  });
-  html+="</tbody></table>";
-  container.innerHTML=html;
-  enableSorting(container);
-}
-
-function renderTopBoxes(data){
-  function buildBox(title,key){
-    const sorted=Object.entries(data).map(([agent,v])=>({agent,value:v[key]||0})).sort((a,b)=>b.value-a.value).slice(0,3);
-    return `<div><div class="title">${title}</div>`+sorted.map(t=>`<div class="agent">${t.agent}: ${Math.round(t.value)}</div>`).join("")+`</div>`;
-  }
-  topSok.innerHTML=buildBox("Highest SOK - Top3","sokTotal");
-  topProfit.innerHTML=buildBox("Highest Profit - Top3","profitTotal");
-  topCalls.innerHTML=buildBox("Highest Calls - Top3","callsTotal");
-}
-
-function enableSorting(container){
-  const table=container.querySelector("table");
-  if(!table) return;
-  const tbody=table.querySelector("tbody");
-  const headers=table.querySelectorAll("th");
-  headers.forEach((th,idx)=>{
-    let asc=true;
-    th.onclick=()=>{
-      const rows=Array.from(tbody.querySelectorAll("tr"));
-      const totalRow=rows.pop();
-      rows.sort((a,b)=>{
-        const aVal=a.cells[idx].dataset.value||a.cells[idx].innerText;
-        const bVal=b.cells[idx].dataset.value||b.cells[idx].innerText;
-        const aNum=parseFloat(aVal.replace(/[^0-9.-]/g,""));
-        const bNum=parseFloat(bVal.replace(/[^0-9.-]/g,""));
-        if(!isNaN(aNum)&&!isNaN(bNum)) return asc?aNum-bNum:bNum-aNum;
-        else return asc?aVal.localeCompare(bVal):bVal.localeCompare(aVal);
+      const uniqueMonths = Array.from(new Set(monthPairs));
+      uniqueMonths.forEach(month => {
+        const option = document.createElement('option');
+        option.textContent = month;
+        option.value = month;
+        monthDropdown.appendChild(option);
       });
-      tbody.innerHTML="";
-      rows.forEach(r=>tbody.appendChild(r));
-      tbody.appendChild(totalRow);
-      asc=!asc;
+
+      latestMonth = uniqueMonths[uniqueMonths.length - 1];  // Latest available month
+      monthDropdown.value = latestMonth;  // Set dropdown to latest month
     }
-  });
-}
 
-function formatTime(sec){
-  if(!sec) return "00:00";
-  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
-  return h?`${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`:`${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
-}
+    function displayData(month) {
+      const monthIndex = headers.indexOf("Month");
+      const filteredData = allData.filter(row => row[monthIndex] === month || month === "ALL");
+      updateTopMetrics(filteredData);
+      populateShiftTables(filteredData);
+    }
 
-loadData();
-setInterval(loadData,5*60*1000);
-</script>
+    function updateTopMetrics(data) {
+      const sokTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("SOK")]) || 0, 0);
+      const profitTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("Profit")]) || 0, 0);
+      const callsTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("Calls")]) || 0, 0);
+
+      topSok.innerHTML = `<div class="title">SOK</div><div class="value">${sokTotal.toFixed(2)}</div>`;
+      topProfit.innerHTML = `<div class="title">Profit</div><div class="value">${profitTotal.toFixed(2)}</div>`;
+      topCalls.innerHTML = `<div class="title">Calls</div><div class="value">${callsTotal.toFixed(0)}</div>`;
+    }
+
+    function populateShiftTables(data) {
+      const morningData = data.filter(row => row[headers.indexOf("Shift")] === "Morning");
+      const nightData = data.filter(row => row[headers.indexOf("Shift")] === "Night");
+
+      morningDiv.innerHTML = generateShiftTable(morningData);
+      nightDiv.innerHTML = generateShiftTable(nightData);
+    }
+
+    function generateShiftTable(shiftData) {
+      const shiftTableHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Agent</th>
+              <th>SOK</th>
+              <th>Profit</th>
+              <th>Calls</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${shiftData.map(row => `
+              <tr>
+                <td>${row[headers.indexOf("Agent")]}</td>
+                <td>${parseFloat(row[headers.indexOf("SOK")]).toFixed(2)}</td>
+                <td>${parseFloat(row[headers.indexOf("Profit")]).toFixed(2)}</td>
+                <td>${parseFloat(row[headers.indexOf("Calls")]).toFixed(0)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      return shiftTableHTML;
+    }
+
+    monthDropdown.addEventListener('change', (e) => {
+      currentMonth = e.target.value;
+      displayData(currentMonth);
+    });
+
+    loadData();  // Initialize everything
+  </script>
 </body>
 </html>
