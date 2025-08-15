@@ -265,16 +265,25 @@ function processCSV(text) {
   headers = lines[0].map(h => h ? h.trim() : "");
   allData = lines.slice(1);
   populateMonths();
+  
   monthDropdown.addEventListener("change", e => {
     currentMonth = e.target.value;
-    if (currentMonth) quarterDropdown.value = "";
+    if (currentMonth) {
+      quarterDropdown.value = "";
+      currentQuarter = ""; // reset quarter filter
+    }
     displayData();
   });
+  
   quarterDropdown.addEventListener("change", e => {
     currentQuarter = e.target.value;
-    if (currentQuarter) monthDropdown.value = "";
+    if (currentQuarter) {
+      monthDropdown.value = "";
+      currentMonth = ""; // reset month filter
+    }
     displayData();
   });
+  
   displayData();
 }
 
