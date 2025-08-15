@@ -9,8 +9,6 @@
       background: #e0f7ff;
       color: #003366;
       margin: 0;
-      user-select: none;
-      font-size: 11px;
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -23,310 +21,181 @@
       font-size: 18px;
     }
 
-    #lastUpdated {
+    #loginForm {
       text-align: center;
-      font-size: 10px;
-      color: #004d80;
-      margin: 2px 0;
+      margin-top: 20%;
     }
 
-    select {
-      padding: 3px 6px;
-      font-size: 11px;
-      border-radius: 4px;
-      border: 1px solid #00bfff;
-      background: #b3e5ff;
-      color: #003366;
-      margin-bottom: 6px;
+    #loginForm input {
+      padding: 10px;
+      font-size: 16px;
     }
 
-    .top-row {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 12px;
+    #loginForm button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
 
+    .dashboard {
+      display: none;
+      padding: 20px;
+    }
+
+    /* Additional styles for the dashboard content */
     .metric-box {
-      flex: 0 0 32%;
-      background: linear-gradient(135deg, #00bfff, #1ec5ff);
-      border: 2px solid #00f0ff;
+      background: #b3e5ff;
       padding: 12px;
       border-radius: 12px;
       text-align: center;
-      font-weight: bold;
       color: #003366;
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.9);
-      position: relative;
-      overflow: hidden;
-      animation: pop 2s infinite alternate;
-    }
-
-    .metric-box:nth-child(2) {
-      animation-delay: 0.3s;
-    }
-
-    .metric-box:nth-child(3) {
-      animation-delay: 0.6s;
-    }
-
-    @keyframes pop {
-      0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
-      50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(0, 240, 255, 1); }
-      100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
-    }
-
-    .metric-box .title {
-      font-size: 16px;
-      font-weight: bold;
-      text-shadow: 0 0 3px #00f0ff, 0 0 6px #00f0ff;
-      margin-bottom: 6px;
-      letter-spacing: 0.5px;
-    }
-
-    .metric-box .agent {
-      font-size: 14px;
-      margin: 3px 0;
-      text-shadow: 0 0 2px #ffffff, 0 0 4px #00bfff;
-    }
-
-    .shift-container {
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      flex: 1 1 auto;
-      overflow: hidden;
+      margin-bottom: 15px;
     }
 
     .shift-table {
-      background: #b3e5ff;
-      border-radius: 6px;
-      padding: 6px;
-      flex: 1;
-      min-width: 45%;
-      box-shadow: 0 0 8px #00bfff88;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      color: #003366;
-      overflow: hidden;
-    }
-
-    .shift-table h3 {
-      margin: 3px 0 6px;
-      font-size: 13px;
-      color: #0077cc;
-    }
-
-    table {
+      margin-top: 20px;
       width: 100%;
       border-collapse: collapse;
-      font-size: 11px;
-      background: #e6f7ff;
-      flex: 1 1 auto;
-      color: #003366;
-      overflow: hidden;
     }
 
-    thead th {
-      background: #00bfff;
-      padding: 4px;
-      font-size: 11px;
-      color: #003366;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
-    tbody td {
-      padding: 3px 2px;
+    .shift-table th, .shift-table td {
+      padding: 10px;
       text-align: center;
-      border-bottom: 1px solid #00aaff;
+      border: 1px solid #00bfff;
     }
 
-    tbody tr:nth-child(odd) {
-      background-color: #cceeff;
+    .shift-table th {
+      background: #00bfff;
+      color: white;
     }
 
-    tbody tr:last-child {
-      background-color: #00bfff;
-      font-weight: bold;
-      color: #ffffff;
+    .shift-table tr:nth-child(even) {
+      background-color: #f2f2f2;
     }
 
-    tbody tr:hover {
-      background-color: #99e6ff;
+    .shift-table tr:hover {
+      background-color: #d1e7f3;
     }
   </style>
 </head>
 <body>
-  <div id="loginForm" style="text-align:center; margin-top: 20%; font-size: 18px;">
+
+  <!-- Login Form -->
+  <div id="loginForm">
     <h2>Enter Password</h2>
-    <input type="password" id="passwordInput" style="padding: 10px; font-size: 16px;">
-    <button onclick="checkPassword()" style="padding: 10px 20px; font-size: 16px; background-color: #0077cc; color: white; border: none; cursor: pointer;">Submit</button>
+    <input type="password" id="passwordInput" placeholder="Enter password">
+    <button id="submitButton">Submit</button>
+  </div>
+
+  <!-- Dashboard Content (Hidden Initially) -->
+  <div class="dashboard" id="dashboard">
+    <h2>Agent Dashboard</h2>
+    
+    <!-- Metric Boxes -->
+    <div class="metric-box" id="topSok">Top SOK: Loading...</div>
+    <div class="metric-box" id="topProfit">Top Profit: Loading...</div>
+    <div class="metric-box" id="topCalls">Top Calls: Loading...</div>
+    
+    <!-- Shift Tables -->
+    <div id="morningShift">
+      <h3>Morning Shift</h3>
+      <table class="shift-table" id="morningTable"></table>
+    </div>
+    <div id="nightShift">
+      <h3>Night Shift</h3>
+      <table class="shift-table" id="nightTable"></table>
+    </div>
   </div>
 
   <script>
-    const correctPassword = "Blauda123";
+    const correctPassword = "Blauda123";  // Correct password
+    const submitButton = document.getElementById('submitButton');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginForm = document.getElementById('loginForm');
+    const dashboard = document.getElementById('dashboard');
+    const topSok = document.getElementById('topSok');
+    const topProfit = document.getElementById('topProfit');
+    const topCalls = document.getElementById('topCalls');
+    const morningTable = document.getElementById('morningTable');
+    const nightTable = document.getElementById('nightTable');
 
-    function checkPassword() {
-      const enteredPassword = document.getElementById('passwordInput').value;
+    // Handle form submission
+    submitButton.addEventListener('click', function(event) {
+      event.preventDefault();  // Prevent form from submitting and page reload
+      const enteredPassword = passwordInput.value;
 
       if (enteredPassword === correctPassword) {
-        document.getElementById('loginForm').style.display = "none";
-        loadPageContent();
+        loginForm.style.display = 'none';  // Hide the login form
+        dashboard.style.display = 'block';  // Show the dashboard
+        loadDashboardData();  // Load data for the dashboard
       } else {
-        alert("Incorrect password! Try again.");
+        alert('Incorrect password! Try again.');
       }
+    });
+
+    // Function to load dashboard data
+    function loadDashboardData() {
+      // Simulating data fetch (replace with actual data fetch logic)
+      setTimeout(() => {
+        topSok.textContent = "Top SOK: Agent123 - 98";
+        topProfit.textContent = "Top Profit: Agent456 - $5000";
+        topCalls.textContent = "Top Calls: Agent789 - 150 Calls";
+
+        // Load shift tables
+        loadShiftData();
+      }, 1000);
     }
 
-    function loadPageContent() {
-      // Clear login prompt and load dashboard content
-      document.body.innerHTML = `
-        <h2>Agent Dashboard - Compact View</h2>
-        <div id="lastUpdated"></div>
-        <div style="text-align:center;">
-          <select id="monthDropdown"></select>
-        </div>
+    // Function to load shift data (replace with actual data fetch logic)
+    function loadShiftData() {
+      const morningShiftData = [
+        ["Agent A", "10", "5", "50", "20:00", "$200"],
+        ["Agent B", "15", "8", "60", "22:00", "$250"],
+        ["Agent C", "8", "3", "40", "18:00", "$150"]
+      ];
 
-        <div class="top-row">
-          <div id="topSok" class="metric-box"></div>
-          <div id="topProfit" class="metric-box"></div>
-          <div id="topCalls" class="metric-box"></div>
-        </div>
+      const nightShiftData = [
+        ["Agent D", "12", "7", "55", "23:00", "$220"],
+        ["Agent E", "18", "10", "70", "20:30", "$300"],
+        ["Agent F", "9", "4", "45", "21:00", "$180"]
+      ];
 
-        <div class="shift-container">
-          <div class="shift-table">
-            <h3>Morning Shift</h3>
-            <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
-          </div>
-          <div class="shift-table">
-            <h3>Night Shift</h3>
-            <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
-          </div>
-        </div>
-        
-        <script>
-          const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
-          
-          const monthDropdown = document.getElementById('monthDropdown');
-          const topSok = document.getElementById('topSok');
-          const topProfit = document.getElementById('topProfit');
-          const topCalls = document.getElementById('topCalls');
-          const morningDiv = document.getElementById('morningTable');
-          const nightDiv = document.getElementById('nightTable');
-          const lastUpdated = document.getElementById('lastUpdated');
-          
-          let allData = [], headers = [], currentMonth = "ALL";
-          let latestMonth = "ALL"; 
+      renderShiftTable(morningShiftData, morningTable);
+      renderShiftTable(nightShiftData, nightTable);
+    }
 
-          async function loadData() {
-            const response = await fetch(CSV_URL);
-            const text = await response.text();
-            processCSV(text);
-            lastUpdated.textContent = "Last updated: " + new Date().toLocaleString();
-          }
+    // Function to render shift table
+    function renderShiftTable(data, tableElement) {
+      const headers = ["Agent", "SOK Count", "Reserved Count", "Total Calls", "Total Talktime", "Estimated SOK Profit"];
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      
+      headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
+      });
 
-          function processCSV(text) {
-            const lines = text.trim().split('\n').map(parseCSVLine);
-            headers = lines[0].map(h => h ? h.trim() : "");
-            allData = lines.slice(1);
-            populateMonths();
-            displayData(currentMonth);
-          }
+      thead.appendChild(headerRow);
+      tableElement.appendChild(thead);
 
-          function parseCSVLine(line) {
-            const result = [];
-            let inQuotes = false, value = '';
-            for (let i = 0; i < line.length; i++) {
-              const c = line[i];
-              if (c === ',' && !inQuotes) {
-                result.push(value);
-                value = '';
-              } else if (c === '"' && (i === 0 || line[i-1] !== '\\')) {
-                inQuotes = !inQuotes;
-              } else {
-                value += c;
-              }
-            }
-            result.push(value);
-            return result;
-          }
+      const tbody = document.createElement('tbody');
+      data.forEach(row => {
+        const rowElement = document.createElement('tr');
+        row.forEach(cell => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+          rowElement.appendChild(td);
+        });
+        tbody.appendChild(rowElement);
+      });
 
-          function populateMonths() {
-            const monthIndex = headers.indexOf("Month");
-            const months = Array.from(new Set(allData.map(row => row[monthIndex]))).sort();
-            months.forEach(month => {
-              const option = document.createElement("option");
-              option.textContent = month || "ALL";
-              option.value = month || "ALL";
-              monthDropdown.appendChild(option);
-            });
-            monthDropdown.value = "ALL";
-            monthDropdown.onchange = () => displayData(monthDropdown.value);
-          }
-
-          function displayData(month) {
-            currentMonth = month;
-            const filteredData = currentMonth === "ALL" ? allData : allData.filter(row => row[headers.indexOf("Month")] === currentMonth);
-            displayTopMetrics(filteredData);
-            displayShifts(filteredData);
-          }
-
-          function displayTopMetrics(filteredData) {
-            const sokColumn = headers.indexOf("SOK");
-            const profitColumn = headers.indexOf("Profit");
-            const callsColumn = headers.indexOf("Calls");
-
-            const topSokAgent = filteredData.reduce((max, row) => parseFloat(row[sokColumn]) > max.value ? { agent: row[headers.indexOf("Agent")], value: row[sokColumn] } : max, { value: -Infinity });
-            const topProfitAgent = filteredData.reduce((max, row) => parseFloat(row[profitColumn]) > max.value ? { agent: row[headers.indexOf("Agent")], value: row[profitColumn] } : max, { value: -Infinity });
-            const topCallsAgent = filteredData.reduce((max, row) => parseInt(row[callsColumn]) > max.value ? { agent: row[headers.indexOf("Agent")], value: row[callsColumn] } : max, { value: -Infinity });
-
-            topSok.innerHTML = `<div class="title">Top SOK</div><div class="agent">${topSokAgent.agent}</div><div>${topSokAgent.value}</div>`;
-            topProfit.innerHTML = `<div class="title">Top Profit</div><div class="agent">${topProfitAgent.agent}</div><div>${topProfitAgent.value}</div>`;
-            topCalls.innerHTML = `<div class="title">Top Calls</div><div class="agent">${topCallsAgent.agent}</div><div>${topCallsAgent.value}</div>`;
-          }
-
-          function displayShifts(filteredData) {
-            const morningShiftData = filteredData.filter(row => row[headers.indexOf("Shift")] === "Morning");
-            const nightShiftData = filteredData.filter(row => row[headers.indexOf("Shift")] === "Night");
-
-            morningDiv.innerHTML = generateTable(morningShiftData);
-            nightDiv.innerHTML = generateTable(nightShiftData);
-          }
-
-          function generateTable(data) {
-            const table = document.createElement('table');
-            const thead = document.createElement('thead');
-            const tbody = document.createElement('tbody');
-
-            const headerRow = document.createElement('tr');
-            headers.forEach(header => {
-              const th = document.createElement('th');
-              th.textContent = header;
-              headerRow.appendChild(th);
-            });
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
-
-            data.forEach(row => {
-              const rowElement = document.createElement('tr');
-              row.forEach(cell => {
-                const td = document.createElement('td');
-                td.textContent = cell;
-                rowElement.appendChild(td);
-              });
-              tbody.appendChild(rowElement);
-            });
-
-            table.appendChild(tbody);
-            return table.outerHTML;
-          }
-
-          loadData();
-        </script>
-      `;
+      tableElement.appendChild(tbody);
     }
   </script>
+
 </body>
 </html>
