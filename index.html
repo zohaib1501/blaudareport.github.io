@@ -55,7 +55,7 @@
     position: relative;
     overflow: hidden;
   }
-  /* New animation: only text zooms */
+  /* Animate only text */
   .metric-box .title, .metric-box .agent {
     animation: textPop 2s infinite alternate;
   }
@@ -284,18 +284,8 @@ function populateMonths() {
   const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   let monthPairs = Array.from(new Set(allData.map(row=>{
     const raw=row[monthIndex]; if(!raw) return null;
-    let dateObj;
-    if(!isNaN(Date.parse(raw))) dateObj=new Date(raw);
-    else {
-      const parts=raw.split(/[-\\/]/);
-      if(parts.length>=3){
-        const day=parseInt(parts[0],10);
-        const monthIdx=isNaN(parts[1])?monthNames.findIndex(n=>n.toLowerCase()===parts[1].slice(0,3).toLowerCase()):parseInt(parts[1],10)-1;
-        const year=parseInt(parts[2],10);
-        dateObj=new Date(year,monthIdx,day);
-      }
-    }
-    if(dateObj&&!isNaN(dateObj)){
+    let dateObj=new Date(raw);
+    if(dateObj && !isNaN(dateObj)) {
       const formatted=monthNames[dateObj.getMonth()]+'-'+dateObj.getFullYear().toString().slice(2);
       return JSON.stringify({raw:raw,formatted:formatted,date:dateObj});
     }
@@ -326,20 +316,20 @@ function displayData(){
     profit:headers.indexOf("Estimated SOK Profit")
   };
   let data = allData;
-  if (currentMonth) data = data.filter(r=>r[i.month]===currentMonth);
-  if (currentQuarter) {
+  if (currentMonth) {
+    data = data.filter(r=>r[i.month]===currentMonth);
+  }
+  if (currentQuarter && currentQuarter !== "ALL_Q") {
     const quarterMonths = {
-      Q1: ["Oct-24","Nov-24","Dec-24"],
-      Q2: ["Jan-25","Feb-25","Mar-25"],
-      Q3: ["Apr-25","May-25","Jun-25"],
-      Q4: ["Jul-25","Aug-25","Sep-25"]
+      Q1: [9,10,11], // Oct, Nov, Dec
+      Q2: [0,1,2],   // Jan, Feb, Mar
+      Q3: [3,4,5],   // Apr, May, Jun
+      Q4: [6,7,8]    // Jul, Aug, Sep
     };
-    if (currentQuarter !== "ALL_Q") {
-      data = data.filter(r=>{
-        let mStr = r[i.month];
-        return quarterMonths[currentQuarter].some(qm => mStr.includes(qm));
-      });
-    }
+    data = data.filter(r=>{
+      const d=new Date(r[i.month]);
+      return d && !isNaN(d) && quarterMonths[currentQuarter].includes(d.getMonth());
+    });
   }
   const grouped={morning:{},night:{}};
   const topData={};
