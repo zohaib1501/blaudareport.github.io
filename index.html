@@ -5,7 +5,7 @@
 <title>Agent Dashboard</title>
 <style>
   html, body {
-    overflow-x: hidden; /* Prevent any horizontal scroll */
+    overflow-x: hidden;
   }
   body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -32,15 +32,11 @@
     font-weight: bold;
     color: #003366;
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.9);
-    position: relative; /* Needed for overflow clip */
-    overflow: hidden;   /* Prevent animated text from spilling out */
   }
-  .metric-box .title,
-  .metric-box .agent {
-    display: inline-block;
-    transform-origin: center;
+  .metric-box .title, .metric-box .agent {
     animation: textPop 2s infinite alternate;
-    will-change: transform; /* Optimize animation to prevent reflow */
+    transform-origin: center;
+    display: inline-block;
   }
   @keyframes textPop { 0%{transform:scale(1);} 50%{transform:scale(1.1);} 100%{transform:scale(1);} }
   .metric-box .title {
@@ -270,3 +266,4 @@ function formatTime(sec) {
 </script>
 </body>
 </html>
+Final on Friday 7 PM
