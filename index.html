@@ -234,16 +234,17 @@ enableSorting(container);
 function renderTop(agg) {
   function boxHtml(title, key) {
     const top3 = Object.entries(agg)
-      .map(([agent, v]) => ({ agent, value: v[key] || 0 }))
+      .map(([agent, v]) => ({ agent, value: v[key] }))
       .sort((a,b) => b.value - a.value)
       .slice(0, 3);
     return `<div class="title">${title}</div>` +
-           top3.map(t => `<div class="agent">${t.agent}: ${Math.round(t.value)}</div>`).join("");
+           top3.map(t => `<div class="agent">${t.agent}: ${t.value}</div>`).join("");
   }
   document.getElementById('topSok').innerHTML = boxHtml("Highest SOK - Top3","sokTotal");
   document.getElementById('topProfit').innerHTML = boxHtml("Highest Profit - Top3","profitTotal");
   document.getElementById('topCalls').innerHTML = boxHtml("Highest Calls - Top3","callsTotal");
 }
+
 
 
 function enableSorting(container) {
