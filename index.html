@@ -160,21 +160,22 @@
   </style>
 </head>
 <body>
-  <!-- Password protection -->
   <script>
+    // Password check on page load
     window.onload = function() {
       var password = prompt("Enter password to access this site:");
+
       if (password !== "Blauda123") {
         document.body.innerHTML = "<h1>Access Denied</h1>";
         document.body.style.textAlign = "center";
       } else {
-        // Load the rest of the content only if the password is correct
+        // If password is correct, load content
         loadPageContent();
       }
     };
 
     function loadPageContent() {
-      // Insert all the page content that should be shown after password verification
+      // Page content HTML
       document.body.innerHTML = `
         <h2>Agent Dashboard - Compact View</h2>
         <div id="lastUpdated"></div>
@@ -249,7 +250,7 @@
           function populateMonths() {
             const monthIndex = headers.indexOf("Month");
             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            
+
             const monthPairs = allData.map(row => row[monthIndex]).filter(Boolean);
             const uniqueMonths = Array.from(new Set(monthPairs));
 
