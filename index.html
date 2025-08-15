@@ -186,6 +186,14 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
+    #passwordToggle {
+      cursor: pointer;
+      color: #00bfff;
+      font-size: 14px;
+      text-decoration: underline;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -195,6 +203,7 @@
   <h2>Enter Password</h2>
   <input type="password" id="passwordInput" placeholder="Enter password">
   <button id="submitButton">Submit</button>
+  <span id="passwordToggle">Show Password</span>
 </div>
 
 <!-- Agent Dashboard -->
@@ -229,7 +238,15 @@
   const passwordInput = document.getElementById('passwordInput');
   const loginForm = document.getElementById('loginForm');
   const dashboard = document.getElementById('dashboard');
+  const passwordToggle = document.getElementById('passwordToggle');
   
+  // Toggle password visibility
+  passwordToggle.addEventListener('click', () => {
+    const type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+    passwordToggle.textContent = type === 'password' ? 'Show Password' : 'Hide Password';
+  });
+
   // Handle form submission
   submitButton.addEventListener('click', function(event) {
     event.preventDefault();  // Prevent form from submitting and page reload
@@ -253,102 +270,91 @@
   const topCalls = document.getElementById('topCalls');
   const morningDiv = document.getElementById('morningTable');
   const nightDiv = document.getElementById('nightTable');
-  const lastUpdated = document.getElementById('lastUpdated');
-
-  let allData = [], headers = [], currentMonth = "ALL";
-
+  
+  let headers, allData, currentMonth;
+  
+  // Load the CSV data
   async function loadData() {
     const response = await fetch(CSV_URL);
-    const text = await response.text();
-    processCSV(text);
-    lastUpdated.textContent = "Last updated: " + new Date().toLocaleString();
+    const data = await response.text();
+    parseCSV(data);
   }
 
-  function processCSV(text) {
-    const lines = text.trim().split('\n').map(parseCSVLine);
+  function parseCSV(data) {
+    const lines = data.split('\n').map(line => line.split(','));
     headers = lines[0].map(h => h ? h.trim() : "");
     allData = lines.slice(1);
     populateMonths();
     displayData(currentMonth);
   }
 
-  function parseCSVLine(line) {
-    const result = [];
-    let inQuotes = false, value = '';
-    for (let i=0;i<line.length;i++){
-      const c=line[i];
-      if(c=='"' && line[i+1]=='"'){value+='"'; i++;} 
-      else if(c=='"') inQuotes=!inQuotes;
-      else if(c==',' && !inQuotes){ result.push(value.trim()); value='';}
-      else value+=c;
-    }
-    result.push(value.trim());
-    return result;
-  }
-
   function populateMonths() {
     const monthIndex = headers.indexOf("Month");
-    const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const monthPairs = Array.from(new Set(allData.map(row=>{
-      const raw=row[monthIndex]; if(!raw) return null;
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthPairs = Array.from(new Set(allData.map(row => {
+      const raw = row[monthIndex];
+      if (!raw) return null;
       let dateObj;
-      if(!isNaN(Date.parse(raw))) dateObj=new Date(raw);
+      if (!isNaN(Date.parse(raw))) dateObj = new Date(raw);
       else {
-        const parts=raw.split(/[-\\/]/);
-        if(parts.length>=3){
-          const day=parseInt(parts[0],10);
-          const monthIdx=isNaN(parts[1])?monthNames.findIndex(n=>n.toLowerCase()===parts[1].slice(0,3).toLowerCase()):parseInt(parts[1],10)-1;
-          const year=parseInt(parts[2],10);
-          dateObj=new Date(year,monthIdx,day);
+        const parts = raw.split(/[-\\/]/);
+        if (parts.length >= 3) {
+          const day = parseInt(parts[0], 10);
+          const monthIdx = isNaN(parts[1]) ? monthNames.findIndex(n => n.toLowerCase() === parts[1].slice(0, 3).toLowerCase()) : parseInt(parts[1], 10) - 1;
+          const year = parseInt(parts[2], 10);
+          dateObj = new Date(year, monthIdx, day);
         }
       }
-      if(dateObj&&!isNaN(dateObj)){
-        const formatted=monthNames[dateObj.getMonth()]+'-'+dateObj.getFullYear().toString().slice(2);
-        return JSON.stringify({raw:raw,formatted:formatted});
+      if (dateObj && !isNaN(dateObj)) {
+        const formatted = monthNames[dateObj.getMonth()] + '-' + dateObj.getFullYear().toString().slice(2);
+        return JSON.stringify({ raw, formatted });
       }
       return null;
     }).filter(Boolean)));
 
-    const uniquePairs=monthPairs.map(str=>JSON.parse(str));
-    monthDropdown.innerHTML="<option value='ALL'>All Months</option>"+
-      uniquePairs.map(p=>`<option value="${p.raw}">${p.formatted}</option>`).join('');
-    monthDropdown.addEventListener("change", e=>displayData(e.target.value));
+    const uniquePairs = monthPairs.map(str => JSON.parse(str));
+    const latestMonth = uniquePairs.sort((a, b) => new Date(b.raw) - new Date(a.raw))[0]?.formatted;
+
+    monthDropdown.innerHTML = "<option value='ALL'>All Months</option>" + uniquePairs.map(p => `<option value="${p.raw}">${p.formatted}</option>`).join('');
+    currentMonth = latestMonth;  // Set default to latest month
+    monthDropdown.value = latestMonth;  // Select the latest month
+    monthDropdown.addEventListener("change", e => displayData(e.target.value));
   }
 
-  function displayData(month){
-    currentMonth=month;
-    const i={
-      month:headers.indexOf("Month"),
-      agent:headers.indexOf("Sales Agent"),
-      shift:headers.indexOf("Shift"),
-      sok:headers.indexOf("SOK Count"),
-      reserved:headers.indexOf("Reserved Count"),
-      calls:headers.indexOf("Total Calls"),
-      talk:headers.indexOf("Total Talktime"),
-      profit:headers.indexOf("Estimated SOK Profit")
+  function displayData(month) {
+    currentMonth = month;
+    const i = {
+      month: headers.indexOf("Month"),
+      agent: headers.indexOf("Sales Agent"),
+      shift: headers.indexOf("Shift"),
+      sok: headers.indexOf("SOK Count"),
+      reserved: headers.indexOf("Reserved Count"),
+      calls: headers.indexOf("Total Calls"),
+      talk: headers.indexOf("Total Talktime"),
+      profit: headers.indexOf("Estimated SOK Profit")
     };
 
-    const data = month==="ALL"?allData:allData.filter(r=>r[i.month]===month);
-    const grouped={morning:{},night:{}};
-    const topData={};
+    const data = month === "ALL" ? allData : allData.filter(r => r[i.month] === month);
+    const grouped = { morning: {}, night: {} };
+    const topData = {};
 
-    data.forEach(r=>{
-      const agent=r[i.agent], shiftRaw=(r[i.shift]||"").toLowerCase();
-      const shift=shiftRaw.includes("morning")?"morning":"night";
-      const sok=+r[i.sok]||0, reserved=+r[i.reserved]||0, calls=+r[i.calls]||0, profit=+r[i.profit]||0;
-      let talk=0;
-      const talkRaw=(r[i.talk]||"").toString();
-      if(talkRaw.includes(":")){
-        const t=talkRaw.split(":").map(Number);
-        talk=t.length===3?t[0]*3600+t[1]*60+t[2]:t[0]*60+t[1];
-      } else talk=+talkRaw||0;
+    data.forEach(r => {
+      const agent = r[i.agent], shiftRaw = (r[i.shift] || "").toLowerCase();
+      const shift = shiftRaw.includes("morning") ? "morning" : "night";
+      const sok = +r[i.sok] || 0, reserved = +r[i.reserved] || 0, calls = +r[i.calls] || 0, profit = +r[i.profit] || 0;
+      let talk = 0;
+      const talkRaw = (r[i.talk] || "").toString();
+      if (talkRaw.includes(":")) {
+        const t = talkRaw.split(":").map(Number);
+        talk = t.length === 3 ? t[0] * 3600 + t[1] * 60 + t[2] : t[0] * 60 + t[1];
+      } else talk = +talkRaw || 0;
 
-      if(!grouped[shift][agent]) grouped[shift][agent]={agent,sokTotal:0,reservedTotal:0,callsTotal:0,talkTotal:0,profitTotal:0};
-      const g=grouped[shift][agent];
-      g.sokTotal+=sok; g.reservedTotal+=reserved; g.callsTotal+=calls; g.talkTotal+=talk; g.profitTotal+=profit;
+      if (!grouped[shift][agent]) grouped[shift][agent] = { agent, sokTotal: 0, reservedTotal: 0, callsTotal: 0, talkTotal: 0, profitTotal: 0 };
+      const g = grouped[shift][agent];
+      g.sokTotal += sok; g.reservedTotal += reserved; g.callsTotal += calls; g.talkTotal += talk; g.profitTotal += profit;
 
-      if(!topData[agent]) topData[agent]={sokTotal:0,callsTotal:0,profitTotal:0};
-      topData[agent].sokTotal+=sok; topData[agent].callsTotal+=calls; topData[agent].profitTotal+=profit;
+      if (!topData[agent]) topData[agent] = { sokTotal: 0, callsTotal: 0, profitTotal: 0 };
+      topData[agent].sokTotal += sok; topData[agent].callsTotal += calls; topData[agent].profitTotal += profit;
     });
 
     renderShift(Object.values(grouped.morning), morningDiv);
@@ -356,15 +362,15 @@
     renderTopBoxes(topData);
   }
 
-  function renderShift(data, container){
-    const total={sokTotal:0,reservedTotal:0,callsTotal:0,talkTotal:0,profitTotal:0};
-    data.forEach(d=>{for(let k in total) total[k]+=d[k];});
-    data.push({agent:"Grand Total",...total});
+  function renderShift(data, container) {
+    const total = { sokTotal: 0, reservedTotal: 0, callsTotal: 0, talkTotal: 0, profitTotal: 0 };
+    data.forEach(d => { for (let k in total) total[k] += d[k]; });
+    data.push({ agent: "Grand Total", ...total });
 
-    const headersRow=["Sales Agent","SOK Count","Reserved Count","Total Calls","Total Talktime","Estimated SOK Profit"];
-    let html="<table><thead><tr>"+headersRow.map(h=>`<th>${h}</th>`).join('')+"</tr></thead><tbody>";
-    data.forEach(d=>{
-      html+=`<tr>
+    const headersRow = ["Sales Agent", "SOK Count", "Reserved Count", "Total Calls", "Total Talktime", "Estimated SOK Profit"];
+    let html = "<table><thead><tr>" + headersRow.map(h => `<th>${h}</th>`).join('') + "</tr></thead><tbody>";
+    data.forEach(d => {
+      html += `<tr>
         <td data-value="${d.agent}">${d.agent}</td>
         <td data-value="${d.sokTotal}">${d.sokTotal}</td>
         <td data-value="${d.reservedTotal}">${d.reservedTotal}</td>
@@ -373,51 +379,51 @@
         <td data-value="${Math.round(d.profitTotal)}">¥${Math.round(d.profitTotal)}</td>
       </tr>`;
     });
-    html+="</tbody></table>";
-    container.innerHTML=html;
+    html += "</tbody></table>";
+    container.innerHTML = html;
     enableSorting(container);
   }
 
-  function renderTopBoxes(data){
-    function buildBox(title,key){
-      const sorted=Object.entries(data).map(([agent,v])=>({agent,value:v[key]||0})).sort((a,b)=>b.value-a.value).slice(0,3);
-      return `<div><div class="title">${title}</div>`+sorted.map(t=>`<div class="agent">${t.agent}: ${Math.round(t.value)}</div>`).join("")+"</div>";
+  function renderTopBoxes(data) {
+    function buildBox(title, key) {
+      const sorted = Object.entries(data).map(([agent, v]) => ({ agent, value: v[key] || 0 })).sort((a, b) => b.value - a.value).slice(0, 3);
+      return `<div><div class="title">${title}</div>` + sorted.map(t => `<div class="agent">${t.agent}: ${Math.round(t.value)}</div>`).join("") + "</div>";
     }
-    topSok.innerHTML=buildBox("Highest SOK - Top3","sokTotal");
-    topProfit.innerHTML=buildBox("Highest Profit - Top3","profitTotal");
-    topCalls.innerHTML=buildBox("Highest Calls - Top3","callsTotal");
+    topSok.innerHTML = buildBox("Highest SOK - Top3", "sokTotal");
+    topProfit.innerHTML = buildBox("Highest Profit - Top3", "profitTotal");
+    topCalls.innerHTML = buildBox("Highest Calls - Top3", "callsTotal");
   }
 
-  function enableSorting(container){
-    const table=container.querySelector("table");
-    if(!table) return;
-    const tbody=table.querySelector("tbody");
-    const headers=table.querySelectorAll("th");
-    headers.forEach((th,idx)=>{
-      let asc=true;
-      th.onclick=()=>{
-        const rows=Array.from(tbody.querySelectorAll("tr"));
-        const totalRow=rows.pop();
-        rows.sort((a,b)=>{
-          const aVal=a.cells[idx].dataset.value||a.cells[idx].innerText;
-          const bVal=b.cells[idx].dataset.value||b.cells[idx].innerText;
-          const aNum=parseFloat(aVal.replace(/[^0-9.-]/g,""));
-          const bNum=parseFloat(bVal.replace(/[^0-9.-]/g,""));
-          if(!isNaN(aNum)&&!isNaN(bNum)) return asc?aNum-bNum:bNum-aNum;
-          else return asc?aVal.localeCompare(bVal):bVal.localeCompare(aVal);
+  function enableSorting(container) {
+    const table = container.querySelector("table");
+    if (!table) return;
+    const tbody = table.querySelector("tbody");
+    const headers = table.querySelectorAll("th");
+    headers.forEach((th, idx) => {
+      let asc = true;
+      th.onclick = () => {
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const totalRow = rows.pop();
+        rows.sort((a, b) => {
+          const aVal = a.cells[idx].dataset.value || a.cells[idx].innerText;
+          const bVal = b.cells[idx].dataset.value || b.cells[idx].innerText;
+          const aNum = parseFloat(aVal.replace(/[^0-9.-]/g, ""));
+          const bNum = parseFloat(bVal.replace(/[^0-9.-]/g, ""));
+          if (!isNaN(aNum) && !isNaN(bNum)) return asc ? aNum - bNum : bNum - aNum;
+          else return asc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
         });
-        tbody.innerHTML="";
-        rows.forEach(r=>tbody.appendChild(r));
+        tbody.innerHTML = "";
+        rows.forEach(r => tbody.appendChild(r));
         tbody.appendChild(totalRow);
-        asc=!asc;
-      }
+        asc = !asc;
+      };
     });
   }
 
-  function formatTime(sec){
-    if(!sec) return "00:00";
-    const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
-    return `${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+  function formatTime(sec) {
+    if (!sec) return "00:00";
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   }
 </script>
 
