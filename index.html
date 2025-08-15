@@ -111,13 +111,13 @@
 
 <script>
 /* ===== CONFIG ===== */
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
+const CSV_URL = "YOUR_CSV_URL";
 const PASSWORD = "blauda123";
 
 /* ===== STATE ===== */
 let allData = [], headers = [];
-let currentMonthKey = ""; // 'YYYY-MM' key
-let currentQuarter = "";  // 'Q1'...'Q4' or 'ALL_Q'
+let currentMonthKey = "";
+let currentQuarter = "";
 
 /* ===== PASSWORD GATE ===== */
 document.getElementById('showPass').addEventListener('change', e => {
@@ -312,7 +312,8 @@ function renderTop(agg) {
       .map(([agent, v]) => ({ agent, value: v[key] || 0 }))
       .sort((a,b) => b.value - a.value)
       .slice(0, 3);
-    return `<div><div class="title">${title}</div>${top3.map(t=>`<div class="agent">${t.agent}: ${Math.round(t.value)}</div>`).join("")}</div>`;
+    return `<div class="title">${title}</div>` +
+           top3.map(t => `<div class="agent">${t.agent}: ${Math.round(t.value)}</div>`).join("");
   }
   document.getElementById('topSok').innerHTML = boxHtml("Highest SOK - Top3","sokTotal");
   document.getElementById('topProfit').innerHTML = boxHtml("Highest Profit - Top3","profitTotal");
