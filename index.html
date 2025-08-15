@@ -158,16 +158,54 @@
     background-color: #99e6ff;
   }
 
-  #passwordInput {
-    font-size: 16px;
-    padding: 8px;
-    margin: 10px 0;
+  /* Login Form Styles */
+  .login-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
   }
 
-  .show-password-btn {
+  .login-container input {
+    padding: 10px;
+    width: 200px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    border: 1px solid #00bfff;
+    border-radius: 4px;
+    outline: none;
+  }
+
+  .login-container button {
+    padding: 8px 16px;
+    background-color: #00bfff;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .login-container button:hover {
+    background-color: #0099cc;
+  }
+
+  .show-password {
+    background: none;
+    border: none;
     color: #0077cc;
     cursor: pointer;
-    text-decoration: underline;
+    font-size: 12px;
+    padding: 0;
+  }
+
+  .show-password:focus {
+    outline: none;
   }
 
 </style>
@@ -196,153 +234,132 @@
   </div>
 </div>
 
-<div id="passwordPrompt" style="display: block;">
-  <div style="text-align: center;">
-    <h3>Enter Password</h3>
-    <input id="passwordInput" type="password" placeholder="Enter password" />
-    <span class="show-password-btn" onclick="togglePassword()">Show</span>
-    <br />
-    <button onclick="checkPassword()">Submit</button>
-  </div>
+<!-- Login Form -->
+<div id="loginForm" class="login-container">
+  <h3>Enter Password</h3>
+  <input type="password" id="password" placeholder="Enter Password">
+  <button id="loginButton">Submit</button>
+  <button type="button" id="togglePassword" class="show-password">Show Password</button>
 </div>
 
 <script>
+const validPassword = "blauda123"; // Set the password
+
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
 
-const validPassword = "blauda123"; // Set your password here
 const monthDropdown = document.getElementById('monthDropdown');
 const topSok = document.getElementById('topSok');
 const topProfit = document.getElementById('topProfit');
 const topCalls = document.getElementById('topCalls');
 const morningDiv = document.getElementById('morningTable');
 const nightDiv = document.getElementById('nightTable');
-const lastUpdated = document.getElementById('lastUpdated');
-const passwordPrompt = document.getElementById('passwordPrompt');
-const passwordInput = document.getElementById('passwordInput');
+const lastUpdatedDiv = document.getElementById('lastUpdated');
+const loginForm = document.getElementById('loginForm');
+const passwordField = document.getElementById('password');
+const loginButton = document.getElementById('loginButton');
+const togglePasswordButton = document.getElementById('togglePassword');
+let sheetData = [];
+let currentMonthData = [];
 
-let allData = [], headers = [], currentMonth = "ALL";
-
-// Password protection check
-function checkPassword() {
-  const enteredPassword = passwordInput.value.trim();
-  if (enteredPassword === validPassword) {
-    passwordPrompt.style.display = 'none';
-    loadData();
-  } else {
-    alert("Invalid password");
-  }
+function fetchData() {
+  fetch(CSV_URL)
+    .then(response => response.text())
+    .then(data => processCSVData(data))
+    .catch(error => console.error('Error fetching CSV:', error));
 }
 
-// Toggle password visibility
-function togglePassword() {
-  const passwordField = document.getElementById('passwordInput');
-  if (passwordField.type === "password") {
-    passwordField.type = "text";
-  } else {
-    passwordField.type = "password";
-  }
+function processCSVData(data) {
+  const rows = data.split("\n");
+  const headers = rows[0].split(",").map(h => h.trim());
+  sheetData = rows.slice(1).map(row => row.split(",").map(cell => cell.trim()));
+
+  const months = [...new Set(sheetData.map(row => row[0]))];
+  months.sort((a, b) => new Date(b) - new Date(a)); // Sort months in reverse order
+  populateMonthDropdown(months);
+
+  displayLatestData();
 }
 
-async function loadData() {
-  const response = await fetch(CSV_URL);
-  const text = await response.text();
-  processCSV(text);
-  lastUpdated.textContent = "Last updated: " + new Date().toLocaleString();
+function populateMonthDropdown(months) {
+  months.forEach(month => {
+    const option = document.createElement('option');
+    option.value = month;
+    option.textContent = month;
+    monthDropdown.appendChild(option);
+  });
+  monthDropdown.value = months[0]; // Default to latest month
 }
 
-function processCSV(text) {
-  const lines = text.trim().split('\n').map(parseCSVLine);
-  headers = lines[0].map(h => h ? h.trim() : "");
-  allData = lines.slice(1);
-  populateMonths();
-  displayData(currentMonth);
+function displayLatestData() {
+  const selectedMonth = monthDropdown.value;
+  currentMonthData = sheetData.filter(row => row[0] === selectedMonth);
+
+  displayMetrics();
+  displayTables();
 }
 
-function parseCSVLine(line) {
-  const result = [];
-  let inQuotes = false, value = '';
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c == '"' && line[i + 1] == '"') { value += c; i++; }
-    else if (c == '"') inQuotes = !inQuotes;
-    else if (c == ',' && !inQuotes) { result.push(value.trim()); value = ''; }
-    else value += c;
-  }
-  result.push(value.trim());
-  return result;
+function displayMetrics() {
+  const sokData = currentMonthData.filter(row => row[1] === 'Sok').reduce((acc, row) => acc + Number(row[4]), 0);
+  const profitData = currentMonthData.filter(row => row[1] === 'Profit').reduce((acc, row) => acc + Number(row[4]), 0);
+  const callsData = currentMonthData.filter(row => row[1] === 'Calls').reduce((acc, row) => acc + Number(row[4]), 0);
+
+  topSok.innerHTML = `<div class="title">Top Sok</div><div class="agent">${sokData}</div>`;
+  topProfit.innerHTML = `<div class="title">Top Profit</div><div class="agent">${profitData}</div>`;
+  topCalls.innerHTML = `<div class="title">Top Calls</div><div class="agent">${callsData}</div>`;
 }
 
-function populateMonths() {
-  const months = [...new Set(allData.map(row => row[0]))];
-  const monthDropdownOptions = months.map(month => ({
-    value: month,
-    text: formatMonth(month)
-  }));
-
-  monthDropdownOptions.sort((a, b) => new Date(b.value) - new Date(a.value));
-
-  // Set the default selected month as the latest month
-  monthDropdown.innerHTML = monthDropdownOptions.map(opt => 
-    `<option value="${opt.value}" ${opt.value === monthDropdownOptions[0].value ? 'selected' : ''}>${opt.text}</option>`
-  ).join('');
-
-  monthDropdown.value = monthDropdownOptions[0].value;
-  currentMonth = monthDropdown.value;
+function displayTables() {
+  morningDiv.innerHTML = generateTableContent('Morning');
+  nightDiv.innerHTML = generateTableContent('Night');
 }
 
-function formatMonth(month) {
-  const date = new Date(month);
-  const options = { month: 'short', year: '2-digit' };
-  return new Intl.DateTimeFormat('en-US', options).format(date);
-}
+function generateTableContent(shiftType) {
+  const shiftData = currentMonthData.filter(row => row[1] === shiftType);
+  if (shiftData.length === 0) return "<p>No data available for this shift</p>";
 
-function displayData(month) {
-  const filteredData = allData.filter(row => row[0] === month);
-  processTopMetrics(filteredData);
-  populateShiftTables(filteredData);
-}
-
-function processTopMetrics(data) {
-  const topSokData = data.sort((a, b) => b[1] - a[1])[0];
-  const topProfitData = data.sort((a, b) => b[2] - a[2])[0];
-  const topCallsData = data.sort((a, b) => b[3] - a[3])[0];
-
-  topSok.innerHTML = `<div class="title">Top SOK</div><div class="agent">${topSokData[4]}</div><div class="value">${topSokData[1]}</div>`;
-  topProfit.innerHTML = `<div class="title">Top Profit</div><div class="agent">${topProfitData[4]}</div><div class="value">${topProfitData[2]}</div>`;
-  topCalls.innerHTML = `<div class="title">Top Calls</div><div class="agent">${topCallsData[4]}</div><div class="value">${topCallsData[3]}</div>`;
-}
-
-function populateShiftTables(data) {
-  const morningShiftData = data.filter(row => row[5] === "Morning");
-  const nightShiftData = data.filter(row => row[5] === "Night");
-
-  morningDiv.innerHTML = generateTableHTML(morningShiftData);
-  nightDiv.innerHTML = generateTableHTML(nightShiftData);
-}
-
-function generateTableHTML(data) {
-  const headers = ["Agent", "SOK", "Profit", "Calls"];
-  const rows = data.map(row => `
+  const headers = ['Date', 'Agent', 'Sok', 'Profit', 'Calls'];
+  const rows = shiftData.map(row => `
     <tr>
-      <td>${row[4]}</td>
-      <td>${row[1]}</td>
+      <td>${row[0]}</td>
       <td>${row[2]}</td>
-      <td>${row[3]}</td>
+      <td>${row[4]}</td>
+      <td>${row[5]}</td>
+      <td>${row[6]}</td>
     </tr>
   `).join('');
 
   return `
     <table>
       <thead>
-        <tr>
-          ${headers.map(header => `<th>${header}</th>`).join('')}
-        </tr>
+        <tr>${headers.map(header => `<th>${header}</th>`).join('')}</tr>
       </thead>
       <tbody>
         ${rows}
       </tbody>
     </table>
   `;
+}
+
+monthDropdown.addEventListener('change', displayLatestData);
+
+loginButton.addEventListener('click', checkPassword);
+passwordField.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') checkPassword(); // Handle Enter key press
+});
+
+togglePasswordButton.addEventListener('click', () => {
+  const isPasswordVisible = passwordField.type === 'text';
+  passwordField.type = isPasswordVisible ? 'password' : 'text';
+});
+
+function checkPassword() {
+  const enteredPassword = passwordField.value.trim();
+  if (enteredPassword === validPassword) {
+    loginForm.style.display = 'none';
+    fetchData();
+  } else {
+    alert('Incorrect password');
+  }
 }
 
 </script>
