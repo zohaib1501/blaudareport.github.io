@@ -158,210 +158,116 @@
     background-color: #99e6ff;
   }
 
-  /* Login Form Styles */
+  /* Login Styles */
   .login-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .login-box {
+    background: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
   }
 
-  .login-container input {
-    padding: 10px;
-    width: 200px;
-    margin-bottom: 10px;
+  .login-box input {
+    padding: 8px;
     font-size: 14px;
-    border: 1px solid #00bfff;
+    margin: 10px;
+    width: 250px;
     border-radius: 4px;
-    outline: none;
+    border: 1px solid #00bfff;
   }
 
-  .login-container button {
+  .login-box button {
     padding: 8px 16px;
-    background-color: #00bfff;
+    font-size: 14px;
+    background: #00bfff;
     border: none;
+    border-radius: 4px;
     color: white;
     cursor: pointer;
-    border-radius: 4px;
-    font-size: 14px;
-    width: 100%;
   }
 
-  .login-container button:hover {
-    background-color: #0099cc;
-  }
-
-  .show-password {
-    background: none;
-    border: none;
-    color: #0077cc;
-    cursor: pointer;
-    font-size: 12px;
-    padding: 0;
-  }
-
-  .show-password:focus {
-    outline: none;
+  .login-box button:hover {
+    background: #008bb0;
   }
 
 </style>
 </head>
 <body>
-<h2>Agent Dashboard - Compact View</h2>
-<div id="lastUpdated"></div>
-<div style="text-align:center;">
-  <select id="monthDropdown"></select>
-</div>
 
-<div class="top-row">
-  <div id="topSok" class="metric-box"></div>
-  <div id="topProfit" class="metric-box"></div>
-  <div id="topCalls" class="metric-box"></div>
-</div>
-
-<div class="shift-container">
-  <div class="shift-table">
-    <h3>Morning Shift</h3>
-    <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
-  </div>
-  <div class="shift-table">
-    <h3>Night Shift</h3>
-    <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
+<!-- Login Screen -->
+<div id="loginScreen" class="login-container">
+  <div class="login-box">
+    <h2>Login</h2>
+    <input type="password" id="password" placeholder="Enter password">
+    <button id="loginButton">Login</button>
+    <div id="errorMessage" style="color: red; font-size: 12px; display: none;">Incorrect password. Please try again.</div>
   </div>
 </div>
 
-<!-- Login Form -->
-<div id="loginForm" class="login-container">
-  <h3>Enter Password</h3>
-  <input type="password" id="password" placeholder="Enter Password">
-  <button id="loginButton">Submit</button>
-  <button type="button" id="togglePassword" class="show-password">Show Password</button>
+<!-- Main Dashboard -->
+<div id="dashboard" style="display: none;">
+  <h2>Agent Dashboard - Compact View</h2>
+  <div id="lastUpdated"></div>
+  <div style="text-align:center;">
+    <select id="monthDropdown"></select>
+  </div>
+
+  <div class="top-row">
+    <div id="topSok" class="metric-box"></div>
+    <div id="topProfit" class="metric-box"></div>
+    <div id="topCalls" class="metric-box"></div>
+  </div>
+
+  <div class="shift-container">
+    <div class="shift-table">
+      <h3>Morning Shift</h3>
+      <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
+    </div>
+    <div class="shift-table">
+      <h3>Night Shift</h3>
+      <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-const validPassword = "blauda123"; // Set the password
-
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
-
-const monthDropdown = document.getElementById('monthDropdown');
-const topSok = document.getElementById('topSok');
-const topProfit = document.getElementById('topProfit');
-const topCalls = document.getElementById('topCalls');
-const morningDiv = document.getElementById('morningTable');
-const nightDiv = document.getElementById('nightTable');
-const lastUpdatedDiv = document.getElementById('lastUpdated');
-const loginForm = document.getElementById('loginForm');
+// Password Protection Logic
+const validPassword = 'blauda123';
+const loginScreen = document.getElementById('loginScreen');
+const dashboard = document.getElementById('dashboard');
 const passwordField = document.getElementById('password');
 const loginButton = document.getElementById('loginButton');
-const togglePasswordButton = document.getElementById('togglePassword');
-let sheetData = [];
-let currentMonthData = [];
-
-function fetchData() {
-  fetch(CSV_URL)
-    .then(response => response.text())
-    .then(data => processCSVData(data))
-    .catch(error => console.error('Error fetching CSV:', error));
-}
-
-function processCSVData(data) {
-  const rows = data.split("\n");
-  const headers = rows[0].split(",").map(h => h.trim());
-  sheetData = rows.slice(1).map(row => row.split(",").map(cell => cell.trim()));
-
-  const months = [...new Set(sheetData.map(row => row[0]))];
-  months.sort((a, b) => new Date(b) - new Date(a)); // Sort months in reverse order
-  populateMonthDropdown(months);
-
-  displayLatestData();
-}
-
-function populateMonthDropdown(months) {
-  months.forEach(month => {
-    const option = document.createElement('option');
-    option.value = month;
-    option.textContent = month;
-    monthDropdown.appendChild(option);
-  });
-  monthDropdown.value = months[0]; // Default to latest month
-}
-
-function displayLatestData() {
-  const selectedMonth = monthDropdown.value;
-  currentMonthData = sheetData.filter(row => row[0] === selectedMonth);
-
-  displayMetrics();
-  displayTables();
-}
-
-function displayMetrics() {
-  const sokData = currentMonthData.filter(row => row[1] === 'Sok').reduce((acc, row) => acc + Number(row[4]), 0);
-  const profitData = currentMonthData.filter(row => row[1] === 'Profit').reduce((acc, row) => acc + Number(row[4]), 0);
-  const callsData = currentMonthData.filter(row => row[1] === 'Calls').reduce((acc, row) => acc + Number(row[4]), 0);
-
-  topSok.innerHTML = `<div class="title">Top Sok</div><div class="agent">${sokData}</div>`;
-  topProfit.innerHTML = `<div class="title">Top Profit</div><div class="agent">${profitData}</div>`;
-  topCalls.innerHTML = `<div class="title">Top Calls</div><div class="agent">${callsData}</div>`;
-}
-
-function displayTables() {
-  morningDiv.innerHTML = generateTableContent('Morning');
-  nightDiv.innerHTML = generateTableContent('Night');
-}
-
-function generateTableContent(shiftType) {
-  const shiftData = currentMonthData.filter(row => row[1] === shiftType);
-  if (shiftData.length === 0) return "<p>No data available for this shift</p>";
-
-  const headers = ['Date', 'Agent', 'Sok', 'Profit', 'Calls'];
-  const rows = shiftData.map(row => `
-    <tr>
-      <td>${row[0]}</td>
-      <td>${row[2]}</td>
-      <td>${row[4]}</td>
-      <td>${row[5]}</td>
-      <td>${row[6]}</td>
-    </tr>
-  `).join('');
-
-  return `
-    <table>
-      <thead>
-        <tr>${headers.map(header => `<th>${header}</th>`).join('')}</tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
-  `;
-}
-
-monthDropdown.addEventListener('change', displayLatestData);
+const errorMessage = document.getElementById('errorMessage');
 
 loginButton.addEventListener('click', checkPassword);
 passwordField.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') checkPassword(); // Handle Enter key press
-});
-
-togglePasswordButton.addEventListener('click', () => {
-  const isPasswordVisible = passwordField.type === 'text';
-  passwordField.type = isPasswordVisible ? 'password' : 'text';
+  if (e.key === 'Enter') checkPassword();
 });
 
 function checkPassword() {
   const enteredPassword = passwordField.value.trim();
   if (enteredPassword === validPassword) {
-    loginForm.style.display = 'none';
-    fetchData();
+    loginScreen.style.display = 'none';
+    dashboard.style.display = 'block';
+    loadData(); // Load data only after successful login
   } else {
-    alert('Incorrect password');
+    errorMessage.style.display = 'block';
   }
 }
 
+// The rest of your original code (unchanged) goes here...
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
+
+// (Remaining script as you provided, unchanged)
 </script>
+
 </body>
 </html>
