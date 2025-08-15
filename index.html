@@ -15,21 +15,18 @@
     flex-direction: column;
     height: 100vh;
   }
-
   h2 {
     text-align: center;
     color: #0077cc;
     margin: 5px 0;
     font-size: 18px;
   }
-
   #lastUpdated {
     text-align: center;
     font-size: 10px;
     color: #004d80;
     margin: 2px 0;
   }
-
   select {
     padding: 3px 6px;
     font-size: 11px;
@@ -39,14 +36,12 @@
     color: #003366;
     margin-bottom: 6px;
   }
-
   .top-row {
     display: flex;
     justify-content: center;
     gap: 8px;
     margin-bottom: 12px;
   }
-
   .metric-box {
     flex: 0 0 32%;
     background: linear-gradient(135deg, #00bfff, #1ec5ff);
@@ -59,23 +54,16 @@
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.9);
     position: relative;
     overflow: hidden;
-    animation: pop 2s infinite alternate;
   }
-
-  .metric-box:nth-child(2) {
-    animation-delay: 0.3s;
+  /* New animation: only text zooms */
+  .metric-box .title, .metric-box .agent {
+    animation: textPop 2s infinite alternate;
   }
-
-  .metric-box:nth-child(3) {
-    animation-delay: 0.6s;
+  @keyframes textPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
   }
-
-  @keyframes pop {
-    0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
-    50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(0, 240, 255, 1); }
-    100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
-  }
-
   .metric-box .title {
     font-size: 16px;
     font-weight: bold;
@@ -83,13 +71,11 @@
     margin-bottom: 6px;
     letter-spacing: 0.5px;
   }
-
   .metric-box .agent {
     font-size: 14px;
     margin: 3px 0;
     text-shadow: 0 0 2px #ffffff, 0 0 4px #00bfff;
   }
-
   .shift-container {
     display: flex;
     justify-content: space-between;
@@ -97,7 +83,6 @@
     flex: 1 1 auto;
     overflow: hidden;
   }
-
   .shift-table {
     background: #b3e5ff;
     border-radius: 6px;
@@ -112,13 +97,11 @@
     color: #003366;
     overflow: hidden;
   }
-
   .shift-table h3 {
     margin: 3px 0 6px;
     font-size: 13px;
     color: #0077cc;
   }
-
   table {
     width: 100%;
     border-collapse: collapse;
@@ -128,7 +111,6 @@
     color: #003366;
     overflow: hidden;
   }
-
   thead th {
     background: #00bfff;
     padding: 4px;
@@ -137,41 +119,81 @@
     cursor: pointer;
     border-radius: 4px;
   }
-
   tbody td {
     padding: 3px 2px;
     text-align: center;
     border-bottom: 1px solid #00aaff;
   }
-
   tbody tr:nth-child(odd) {
     background-color: #cceeff;
   }
-
   tbody tr:last-child {
     background-color: #00bfff;
     font-weight: bold;
     color: #ffffff;
   }
-
   tbody tr:hover {
     background-color: #99e6ff;
+  }
+  /* Password Screen */
+  #passwordScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #e0f7ff;
+  }
+  #passwordScreen input {
+    padding: 5px;
+    margin: 5px;
+    border-radius: 4px;
+    border: 1px solid #00bfff;
+  }
+  #passwordScreen button {
+    padding: 5px 10px;
+    border: none;
+    background: #00bfff;
+    color: #003366;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  #errorMsg {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
   }
 </style>
 </head>
 <body>
+<div id="passwordScreen">
+  <h2>Enter Password</h2>
+  <input type="password" id="passwordInput" placeholder="Password">
+  <label><input type="checkbox" id="showPass"> Show Password</label>
+  <button id="passwordBtn">Submit</button>
+  <div id="errorMsg"></div>
+</div>
+
+<div id="dashboard" style="display:none;">
 <h2>Agent Dashboard - Compact View</h2>
 <div id="lastUpdated"></div>
 <div style="text-align:center;">
   <select id="monthDropdown"></select>
+  <select id="quarterDropdown">
+    <option value="">Select Quarter</option>
+    <option value="ALL_Q">All Quarters</option>
+    <option value="Q1">Q1</option>
+    <option value="Q2">Q2</option>
+    <option value="Q3">Q3</option>
+    <option value="Q4">Q4</option>
+  </select>
 </div>
-
 <div class="top-row">
   <div id="topSok" class="metric-box"></div>
   <div id="topProfit" class="metric-box"></div>
   <div id="topCalls" class="metric-box"></div>
 </div>
-
 <div class="shift-container">
   <div class="shift-table">
     <h3>Morning Shift</h3>
@@ -182,11 +204,14 @@
     <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
   </div>
 </div>
+</div>
 
 <script>
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
+const PASSWORD = "blauda123";
 
 const monthDropdown = document.getElementById('monthDropdown');
+const quarterDropdown = document.getElementById('quarterDropdown');
 const topSok = document.getElementById('topSok');
 const topProfit = document.getElementById('topProfit');
 const topCalls = document.getElementById('topCalls');
@@ -194,7 +219,26 @@ const morningDiv = document.getElementById('morningTable');
 const nightDiv = document.getElementById('nightTable');
 const lastUpdated = document.getElementById('lastUpdated');
 
-let allData = [], headers = [], currentMonth = "ALL";
+let allData = [], headers = [], currentMonth = "", currentQuarter = "";
+
+// Password logic
+document.getElementById('showPass').addEventListener('change', e => {
+  document.getElementById('passwordInput').type = e.target.checked ? 'text' : 'password';
+});
+document.getElementById('passwordBtn').addEventListener('click', checkPassword);
+document.getElementById('passwordInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkPassword();
+});
+function checkPassword() {
+  const inputPass = document.getElementById('passwordInput').value;
+  if (inputPass === PASSWORD) {
+    document.getElementById('passwordScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadData();
+  } else {
+    document.getElementById('errorMsg').textContent = 'Incorrect password!';
+  }
+}
 
 async function loadData() {
   const response = await fetch(CSV_URL);
@@ -208,7 +252,17 @@ function processCSV(text) {
   headers = lines[0].map(h => h ? h.trim() : "");
   allData = lines.slice(1);
   populateMonths();
-  displayData(currentMonth);
+  monthDropdown.addEventListener("change", e => {
+    currentMonth = e.target.value;
+    if (currentMonth) quarterDropdown.value = "";
+    displayData();
+  });
+  quarterDropdown.addEventListener("change", e => {
+    currentQuarter = e.target.value;
+    if (currentQuarter) monthDropdown.value = "";
+    displayData();
+  });
+  displayData();
 }
 
 function parseCSVLine(line) {
@@ -216,7 +270,7 @@ function parseCSVLine(line) {
   let inQuotes = false, value = '';
   for (let i=0;i<line.length;i++){
     const c=line[i];
-    if(c=='"' && line[i+1]=='"'){value+='"'; i++;} 
+    if(c=='"' && line[i+1]=='"'){value+='"'; i++;}
     else if(c=='"') inQuotes=!inQuotes;
     else if(c==',' && !inQuotes){ result.push(value.trim()); value='';}
     else value+=c;
@@ -228,7 +282,7 @@ function parseCSVLine(line) {
 function populateMonths() {
   const monthIndex = headers.indexOf("Month");
   const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const monthPairs = Array.from(new Set(allData.map(row=>{
+  let monthPairs = Array.from(new Set(allData.map(row=>{
     const raw=row[monthIndex]; if(!raw) return null;
     let dateObj;
     if(!isNaN(Date.parse(raw))) dateObj=new Date(raw);
@@ -243,19 +297,24 @@ function populateMonths() {
     }
     if(dateObj&&!isNaN(dateObj)){
       const formatted=monthNames[dateObj.getMonth()]+'-'+dateObj.getFullYear().toString().slice(2);
-      return JSON.stringify({raw:raw,formatted:formatted});
+      return JSON.stringify({raw:raw,formatted:formatted,date:dateObj});
     }
     return null;
   }).filter(Boolean)));
 
-  const uniquePairs=monthPairs.map(str=>JSON.parse(str));
-  monthDropdown.innerHTML=`<option value="ALL">All Months</option>`+
+  let uniquePairs=monthPairs.map(str=>JSON.parse(str));
+  uniquePairs.sort((a,b)=>b.date - a.date);
+
+  monthDropdown.innerHTML=`<option value="">Select Month</option>`+
     uniquePairs.map(p=>`<option value="${p.raw}">${p.formatted}</option>`).join('');
-  monthDropdown.addEventListener("change", e=>displayData(e.target.value));
+
+  if (uniquePairs.length > 0) {
+    monthDropdown.value = uniquePairs[0].raw;
+    currentMonth = uniquePairs[0].raw;
+  }
 }
 
-function displayData(month){
-  currentMonth=month;
+function displayData(){
   const i={
     month:headers.indexOf("Month"),
     agent:headers.indexOf("Sales Agent"),
@@ -266,11 +325,24 @@ function displayData(month){
     talk:headers.indexOf("Total Talktime"),
     profit:headers.indexOf("Estimated SOK Profit")
   };
-
-  const data = month==="ALL"?allData:allData.filter(r=>r[i.month]===month);
+  let data = allData;
+  if (currentMonth) data = data.filter(r=>r[i.month]===currentMonth);
+  if (currentQuarter) {
+    const quarterMonths = {
+      Q1: ["Oct-24","Nov-24","Dec-24"],
+      Q2: ["Jan-25","Feb-25","Mar-25"],
+      Q3: ["Apr-25","May-25","Jun-25"],
+      Q4: ["Jul-25","Aug-25","Sep-25"]
+    };
+    if (currentQuarter !== "ALL_Q") {
+      data = data.filter(r=>{
+        let mStr = r[i.month];
+        return quarterMonths[currentQuarter].some(qm => mStr.includes(qm));
+      });
+    }
+  }
   const grouped={morning:{},night:{}};
   const topData={};
-
   data.forEach(r=>{
     const agent=r[i.agent], shiftRaw=(r[i.shift]||"").toLowerCase();
     const shift=shiftRaw.includes("morning")?"morning":"night";
@@ -281,15 +353,12 @@ function displayData(month){
       const t=talkRaw.split(":").map(Number);
       talk=t.length===3?t[0]*3600+t[1]*60+t[2]:t[0]*60+t[1];
     } else talk=+talkRaw||0;
-
     if(!grouped[shift][agent]) grouped[shift][agent]={agent,sokTotal:0,reservedTotal:0,callsTotal:0,talkTotal:0,profitTotal:0};
     const g=grouped[shift][agent];
     g.sokTotal+=sok; g.reservedTotal+=reserved; g.callsTotal+=calls; g.talkTotal+=talk; g.profitTotal+=profit;
-
     if(!topData[agent]) topData[agent]={sokTotal:0,callsTotal:0,profitTotal:0};
     topData[agent].sokTotal+=sok; topData[agent].callsTotal+=calls; topData[agent].profitTotal+=profit;
   });
-
   renderShift(Object.values(grouped.morning), morningDiv);
   renderShift(Object.values(grouped.night), nightDiv);
   renderTopBoxes(topData);
@@ -299,7 +368,6 @@ function renderShift(data, container){
   const total={sokTotal:0,reservedTotal:0,callsTotal:0,talkTotal:0,profitTotal:0};
   data.forEach(d=>{for(let k in total) total[k]+=d[k];});
   data.push({agent:"Grand Total",...total});
-
   const headersRow=["Sales Agent","SOK Count","Reserved Count","Total Calls","Total Talktime","Estimated SOK Profit"];
   let html="<table><thead><tr>"+headersRow.map(h=>`<th>${h}</th>`).join('')+"</tr></thead><tbody>";
   data.forEach(d=>{
@@ -358,9 +426,6 @@ function formatTime(sec){
   const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
   return h?`${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`:`${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
 }
-
-loadData();
-setInterval(loadData,5*60*1000);
 </script>
 </body>
 </html>
