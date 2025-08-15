@@ -160,22 +160,27 @@
   </style>
 </head>
 <body>
-  <script>
-    // Password check on page load
-    window.onload = function() {
-      var password = prompt("Enter password to access this site:");
+  <div id="loginForm" style="text-align:center; margin-top: 20%; font-size: 18px;">
+    <h2>Enter Password</h2>
+    <input type="password" id="passwordInput" style="padding: 10px; font-size: 16px;">
+    <button onclick="checkPassword()" style="padding: 10px 20px; font-size: 16px; background-color: #0077cc; color: white; border: none; cursor: pointer;">Submit</button>
+  </div>
 
-      if (password !== "Blauda123") {
-        document.body.innerHTML = "<h1>Access Denied</h1>";
-        document.body.style.textAlign = "center";
-      } else {
-        // If password is correct, load content
+  <script>
+    const correctPassword = "Blauda123";
+
+    function checkPassword() {
+      const enteredPassword = document.getElementById('passwordInput').value;
+
+      if (enteredPassword === correctPassword) {
+        document.getElementById('loginForm').style.display = "none";
         loadPageContent();
+      } else {
+        alert("Incorrect password! Try again.");
       }
-    };
+    }
 
     function loadPageContent() {
-      // Page content HTML
       document.body.innerHTML = `
         <h2>Agent Dashboard - Compact View</h2>
         <div id="lastUpdated"></div>
@@ -199,7 +204,7 @@
             <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
           </div>
         </div>
-
+        
         <script>
           const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
           
@@ -238,9 +243,9 @@
                 value += '"';
                 i++;
               } else if (c == '"') inQuotes = !inQuotes;
-              else if (c == ',' && !inQuotes) {
-                result.push(value.trim());
-                value = '';
+              else if (c == ',' && !inQuotes) { 
+                result.push(value.trim()); 
+                value = ''; 
               } else value += c;
             }
             result.push(value.trim());
@@ -249,78 +254,76 @@
 
           function populateMonths() {
             const monthIndex = headers.indexOf("Month");
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-            const monthPairs = allData.map(row => row[monthIndex]).filter(Boolean);
-            const uniqueMonths = Array.from(new Set(monthPairs));
-
-            uniqueMonths.forEach(month => {
-              const option = document.createElement('option');
-              option.textContent = month;
-              option.value = month;
+            const months = Array.from(new Set(allData.map(row => row[monthIndex]))).sort();
+            months.forEach(month => {
+              const option = document.createElement("option");
+              option.textContent = month || "ALL";
+              option.value = month || "ALL";
               monthDropdown.appendChild(option);
             });
-
-            latestMonth = uniqueMonths[uniqueMonths.length - 1]; 
-            monthDropdown.value = latestMonth;
+            monthDropdown.value = "ALL";
+            monthDropdown.onchange = () => displayData(monthDropdown.value);
           }
-
-          monthDropdown.addEventListener('change', (e) => {
-            currentMonth = e.target.value;
-            displayData(currentMonth);
-          });
 
           function displayData(month) {
-            const monthIndex = headers.indexOf("Month");
-            const filteredData = allData.filter(row => row[monthIndex] === month || month === "ALL");
-            updateTopMetrics(filteredData);
-            populateShiftTables(filteredData);
+            currentMonth = month;
+            const filteredData = currentMonth === "ALL" ? allData : allData.filter(row => row[headers.indexOf("Month")] === currentMonth);
+            
+            displayTopMetrics(filteredData);
+            displayShifts(filteredData);
           }
 
-          function updateTopMetrics(data) {
-            const sokTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("SOK")]) || 0, 0);
-            const profitTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("Profit")]) || 0, 0);
-            const callsTotal = data.reduce((sum, row) => sum + parseFloat(row[headers.indexOf("Calls")]) || 0, 0);
+          function displayTopMetrics(filteredData) {
+            const sokColumn = headers.indexOf("SOK");
+            const profitColumn = headers.indexOf("Profit");
+            const callsColumn = headers.indexOf("Calls");
 
-            topSok.innerHTML = `<div class="title">SOK</div><div class="value">${sokTotal.toFixed(2)}</div>`;
-            topProfit.innerHTML = `<div class="title">Profit</div><div class="value">${profitTotal.toFixed(2)}</div>`;
-            topCalls.innerHTML = `<div class="title">Calls</div><div class="value">${callsTotal.toFixed(0)}</div>`;
+            const topSokAgent = filteredData.reduce((max, row) => parseFloat(row[sokColumn]) > max.value ? { agent: row[headers.indexOf("Agent")], value: row[sokColumn] } : max, { value: -Infinity });
+            const topProfitAgent = filteredData.reduce((max, row) => parseFloat(row[profitColumn]) > max.value ? { agent: row[headers.indexOf("Agent")], value: row[profitColumn] } : max, { value: -Infinity });
+            const topCallsAgent = filteredData.reduce((max, row) => parseInt(row[callsColumn]) > max.value ? { agent: row[headers.indexOf("Agent")], value: row[callsColumn] } : max, { value: -Infinity });
+
+            topSok.innerHTML = `<div class="title">Top SOK</div><div class="agent">${topSokAgent.agent}</div><div>${topSokAgent.value}</div>`;
+            topProfit.innerHTML = `<div class="title">Top Profit</div><div class="agent">${topProfitAgent.agent}</div><div>${topProfitAgent.value}</div>`;
+            topCalls.innerHTML = `<div class="title">Top Calls</div><div class="agent">${topCallsAgent.agent}</div><div>${topCallsAgent.value}</div>`;
           }
 
-          function populateShiftTables(data) {
-            const morningData = data.filter(row => row[headers.indexOf("Shift")] === "Morning");
-            const nightData = data.filter(row => row[headers.indexOf("Shift")] === "Night");
+          function displayShifts(filteredData) {
+            const morningShiftData = filteredData.filter(row => row[headers.indexOf("Shift")] === "Morning");
+            const nightShiftData = filteredData.filter(row => row[headers.indexOf("Shift")] === "Night");
 
-            morningDiv.innerHTML = generateShiftTable(morningData);
-            nightDiv.innerHTML = generateShiftTable(nightData);
+            morningDiv.innerHTML = generateTable(morningShiftData);
+            nightDiv.innerHTML = generateTable(nightShiftData);
           }
 
-          function generateShiftTable(shiftData) {
-            return `
-              <table>
-                <thead>
-                  <tr>
-                    <th>Agent</th>
-                    <th>SOK</th>
-                    <th>Profit</th>
-                    <th>Calls</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${shiftData.map(row => `
-                    <tr>
-                      <td>${row[headers.indexOf("Agent")]}</td>
-                      <td>${parseFloat(row[headers.indexOf("SOK")]).toFixed(2)}</td>
-                      <td>${parseFloat(row[headers.indexOf("Profit")]).toFixed(2)}</td>
-                      <td>${parseFloat(row[headers.indexOf("Calls")]).toFixed(0)}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            `;
+          function generateTable(data) {
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+              const th = document.createElement('th');
+              th.textContent = header;
+              headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            data.forEach(row => {
+              const rowElement = document.createElement('tr');
+              row.forEach(cell => {
+                const td = document.createElement('td');
+                td.textContent = cell;
+                rowElement.appendChild(td);
+              });
+              tbody.appendChild(rowElement);
+            });
+
+            table.appendChild(tbody);
+            return table.outerHTML;
           }
 
-          loadData(); 
+          loadData();
         </script>
       `;
     }
