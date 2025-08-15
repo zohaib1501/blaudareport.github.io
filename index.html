@@ -240,6 +240,19 @@ function checkPassword() {
   }
 }
 
+// Parse "1-Oct-24" style date string
+function parseMonthString(str) {
+  const parts = str.split('-');
+  if (parts.length === 3) {
+    const day = parseInt(parts[0], 10);
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const month = monthNames.findIndex(m => m.toLowerCase() === parts[1].slice(0,3).toLowerCase());
+    const year = 2000 + parseInt(parts[2], 10);
+    return new Date(year, month, day);
+  }
+  return null;
+}
+
 async function loadData() {
   const response = await fetch(CSV_URL);
   const text = await response.text();
@@ -283,9 +296,9 @@ function populateMonths() {
   const monthIndex = headers.indexOf("Month");
   const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   let monthPairs = Array.from(new Set(allData.map(row=>{
-    const raw=row[monthIndex]; if(!raw) return null;
-    let dateObj=new Date(raw);
-    if(dateObj && !isNaN(dateObj)) {
+    const raw=row[monthIndex];
+    const dateObj=parseMonthString(raw);
+    if(dateObj) {
       const formatted=monthNames[dateObj.getMonth()]+'-'+dateObj.getFullYear().toString().slice(2);
       return JSON.stringify({raw:raw,formatted:formatted,date:dateObj});
     }
@@ -327,8 +340,8 @@ function displayData(){
       Q4: [6,7,8]    // Jul, Aug, Sep
     };
     data = data.filter(r=>{
-      const d=new Date(r[i.month]);
-      return d && !isNaN(d) && quarterMonths[currentQuarter].includes(d.getMonth());
+      const d=parseMonthString(r[i.month]);
+      return d && quarterMonths[currentQuarter].includes(d.getMonth());
     });
   }
   const grouped={morning:{},night:{}};
