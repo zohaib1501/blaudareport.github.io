@@ -4,24 +4,49 @@
 <meta charset="UTF-8">
 <title>Agent Dashboard</title>
 <style>
-  html, body {
-    overflow-x: hidden;
-  }
   body {
     font-family: 'Segoe UI', Tahoma, sans-serif;
     background: #e0f7ff;
     color: #003366;
     margin: 0;
+    user-select: none;
     font-size: 11px;
     display: flex;
     flex-direction: column;
     height: 100vh;
   }
-  h2 { text-align: center; margin: 5px 0; font-size: 18px; color: #0077cc; }
-  #lastUpdated { text-align: center; font-size: 10px; color: #004d80; margin: 2px 0; }
-  select { padding: 3px 6px; font-size: 11px; border-radius: 4px; border: 1px solid #00bfff; background: #b3e5ff; margin-bottom: 6px; }
 
-  .top-row { display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; }
+  h2 {
+    text-align: center;
+    color: #0077cc;
+    margin: 5px 0;
+    font-size: 18px;
+  }
+
+  #lastUpdated {
+    text-align: center;
+    font-size: 10px;
+    color: #004d80;
+    margin: 2px 0;
+  }
+
+  select {
+    padding: 3px 6px;
+    font-size: 11px;
+    border-radius: 4px;
+    border: 1px solid #00bfff;
+    background: #b3e5ff;
+    color: #003366;
+    margin-bottom: 6px;
+  }
+
+  .top-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
   .metric-box {
     flex: 0 0 32%;
     background: linear-gradient(135deg, #00bfff, #1ec5ff);
@@ -32,237 +57,310 @@
     font-weight: bold;
     color: #003366;
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.9);
+    position: relative;
+    overflow: hidden;
+    animation: pop 2s infinite alternate;
   }
-  .metric-box .title, .metric-box .agent {
-    animation: textPop 2s infinite alternate;
-    transform-origin: center;
-    display: inline-block;
+
+  .metric-box:nth-child(2) {
+    animation-delay: 0.3s;
   }
-  @keyframes textPop { 0%{transform:scale(1);} 50%{transform:scale(1.1);} 100%{transform:scale(1);} }
+
+  .metric-box:nth-child(3) {
+    animation-delay: 0.6s;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
+    50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(0, 240, 255, 1); }
+    100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
+  }
+
   .metric-box .title {
-    font-size: 16px; margin-bottom: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 0 0 3px #00f0ff, 0 0 6px #00f0ff;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
   }
-  .metric-box .agent { font-size: 14px; margin: 3px 0; }
 
-  .shift-container { display: flex; justify-content: space-between; gap: 6px; flex: 1 1 auto; overflow: hidden; }
-  .shift-table { background: #b3e5ff; border-radius: 6px; padding: 6px; flex: 1; min-width: 45%; box-shadow: 0 0 8px #00bfff88; text-align: center; display: flex; flex-direction: column; height: 100%; }
-  table { width: 100%; border-collapse: collapse; font-size: 11px; background: #e6f7ff; flex: 1 1 auto; }
-  thead th { background: #00bfff; padding: 4px; font-size: 11px; cursor: pointer; border-radius: 4px; }
-  tbody td { padding: 3px 2px; text-align: center; border-bottom: 1px solid #00aaff; }
-  tbody tr:nth-child(odd) { background-color: #cceeff; }
-  tbody tr:last-child { background-color: #00bfff; font-weight: bold; color: #ffffff; }
+  .metric-box .agent {
+    font-size: 14px;
+    margin: 3px 0;
+    text-shadow: 0 0 2px #ffffff, 0 0 4px #00bfff;
+  }
 
-  #passwordScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #e0f7ff; }
-  #passwordScreen input { padding: 5px; margin: 5px; border-radius: 4px; border: 1px solid #00bfff; }
-  #passwordScreen button { padding: 5px 10px; border: none; background: #00bfff; color: #003366; font-weight: bold; cursor: pointer; border-radius: 4px; }
-  #errorMsg { color: red; font-size: 12px; margin-top: 5px; }
+  .shift-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+
+  .shift-table {
+    background: #b3e5ff;
+    border-radius: 6px;
+    padding: 6px;
+    flex: 1;
+    min-width: 45%;
+    box-shadow: 0 0 8px #00bfff88;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: #003366;
+    overflow: hidden;
+  }
+
+  .shift-table h3 {
+    margin: 3px 0 6px;
+    font-size: 13px;
+    color: #0077cc;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    background: #e6f7ff;
+    flex: 1 1 auto;
+    color: #003366;
+    overflow: hidden;
+  }
+
+  thead th {
+    background: #00bfff;
+    padding: 4px;
+    font-size: 11px;
+    color: #003366;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  tbody td {
+    padding: 3px 2px;
+    text-align: center;
+    border-bottom: 1px solid #00aaff;
+  }
+
+  tbody tr:nth-child(odd) {
+    background-color: #cceeff;
+  }
+
+  tbody tr:last-child {
+    background-color: #00bfff;
+    font-weight: bold;
+    color: #ffffff;
+  }
+
+  tbody tr:hover {
+    background-color: #99e6ff;
+  }
 </style>
 </head>
 <body>
-<div id="passwordScreen">
-  <h2>Enter Password</h2>
-  <input type="password" id="passwordInput" placeholder="Password">
-  <label><input type="checkbox" id="showPass"> Show Password</label>
-  <button id="passwordBtn">Submit</button>
-  <div id="errorMsg"></div>
+<h2>Agent Dashboard - Compact View</h2>
+<div id="lastUpdated"></div>
+<div style="text-align:center;">
+  <select id="monthDropdown"></select>
 </div>
 
-<div id="dashboard" style="display:none;">
-  <h2>Agent Dashboard</h2>
-  <div id="lastUpdated"></div>
-  <div style="text-align:center;">
-    <select id="monthDropdown"></select>
-    <select id="quarterDropdown"></select>
+<div class="top-row">
+  <div id="topSok" class="metric-box"></div>
+  <div id="topProfit" class="metric-box"></div>
+  <div id="topCalls" class="metric-box"></div>
+</div>
+
+<div class="shift-container">
+  <div class="shift-table">
+    <h3>Morning Shift</h3>
+    <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
   </div>
-  <div class="top-row">
-    <div id="topSok" class="metric-box"></div>
-    <div id="topProfit" class="metric-box"></div>
-    <div id="topCalls" class="metric-box"></div>
-  </div>
-  <div class="shift-container">
-    <div class="shift-table"><h3>Morning Shift</h3><div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div></div>
-    <div class="shift-table"><h3>Night Shift</h3><div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div></div>
+  <div class="shift-table">
+    <h3>Night Shift</h3>
+    <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
   </div>
 </div>
 
 <script>
-const CSV_URL = "YOUR_CSV_URL";
-const PASSWORD = "blauda123";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
 
-let allData = [], headers = [];
-let currentMonthKey = "", currentQuarter = "";
+const monthDropdown = document.getElementById('monthDropdown');
+const topSok = document.getElementById('topSok');
+const topProfit = document.getElementById('topProfit');
+const topCalls = document.getElementById('topCalls');
+const morningDiv = document.getElementById('morningTable');
+const nightDiv = document.getElementById('nightTable');
+const lastUpdated = document.getElementById('lastUpdated');
 
-document.getElementById('showPass').addEventListener('change', e => {
-  document.getElementById('passwordInput').type = e.target.checked ? 'text' : 'password';
-});
-document.getElementById('passwordBtn').addEventListener('click', checkPassword);
-document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
-
-function checkPassword() {
-  if (document.getElementById('passwordInput').value === PASSWORD) {
-    document.getElementById('passwordScreen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-    loadData();
-  } else {
-    document.getElementById('errorMsg').textContent = 'Incorrect password!';
-  }
-}
+let allData = [], headers = [], currentMonth = "ALL";
 
 async function loadData() {
-  const res = await fetch(CSV_URL);
-  const text = await res.text();
+  const response = await fetch(CSV_URL);
+  const text = await response.text();
   processCSV(text);
-  document.getElementById('lastUpdated').textContent = "Last updated: " + new Date().toLocaleString();
-}
-
-function parseCSVLine(line) {
-  const out = []; let v = "", q = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"' && line[i+1] === '"') { v += '"'; i++; }
-    else if (c === '"') { q = !q; }
-    else if (c === ',' && !q) { out.push(v.trim()); v = ""; }
-    else { v += c; }
-  }
-  out.push(v.trim());
-  return out;
+  lastUpdated.textContent = "Last updated: " + new Date().toLocaleString();
 }
 
 function processCSV(text) {
   const lines = text.trim().split('\n').map(parseCSVLine);
-  headers = lines[0].map(h => h.trim());
+  headers = lines[0].map(h => h ? h.trim() : "");
   allData = lines.slice(1);
-  populateFilters();
-  attachFilterHandlers();
-  displayData();
+  populateMonths();
+  displayData(currentMonth);
 }
 
-function excelSerialToDate(val) {
-  const n = Number(val);
-  if (!isNaN(n) && n > 59) {
-    return new Date((n - 25569) * 86400 * 1000);
+function parseCSVLine(line) {
+  const result = [];
+  let inQuotes = false, value = '';
+  for (let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c=='"' && line[i+1]=='"'){value+='"'; i++;} 
+    else if(c=='"') inQuotes=!inQuotes;
+    else if(c==',' && !inQuotes){ result.push(value.trim()); value='';}
+    else value+=c;
   }
-  return null;
-}
-function parseMonthValue(v) {
-  const dSerial = excelSerialToDate(v);
-  if (dSerial) return dSerial;
-  const dNative = new Date(v);
-  return !isNaN(dNative) ? dNative : null;
-}
-function yyyymm(d) { return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0"); }
-function label_mmmYY(d) { return d.toLocaleString('en-US', { month:'short', year:'2-digit' }); }
-
-function populateFilters() {
-  const idxMonth = headers.indexOf("Month");
-  const idxQuarter = headers.indexOf("Quarters");
-  const monthMap = new Map();
-  const quarterSet = new Set();
-  allData.forEach(r => {
-    const md = parseMonthValue(r[idxMonth]);
-    if (md) monthMap.set(yyyymm(md), md);
-    if (r[idxQuarter]) quarterSet.add(r[idxQuarter]);
-  });
-  const months = Array.from(monthMap.entries()).sort((a,b) => b[1] - a[1]);
-  const monthDD = document.getElementById('monthDropdown');
-  monthDD.innerHTML = `<option value="">All Months</option>` +
-    months.map(([k,d]) => `<option value="${k}">${label_mmmYY(d)}</option>`).join('');
-  if (months.length) { monthDD.value = months[0][0]; currentMonthKey = months[0][0]; }
-  const quarterDD = document.getElementById('quarterDropdown');
-  const quarters = Array.from(quarterSet).sort();
-  quarterDD.innerHTML = `<option value="">Select Quarter</option><option value="ALL_Q">All Quarters</option>` +
-    quarters.map(q => `<option value="${q}">${q}</option>`).join('');
-}
-function attachFilterHandlers() {
-  document.getElementById('monthDropdown').addEventListener('change', e => {
-    currentMonthKey = e.target.value; if (currentMonthKey) currentQuarter = "";
-    displayData();
-  });
-  document.getElementById('quarterDropdown').addEventListener('change', e => {
-    currentQuarter = e.target.value; if (currentQuarter) currentMonthKey = "";
-    displayData();
-  });
+  result.push(value.trim());
+  return result;
 }
 
-function displayData() {
-  const idx = {
-    quarter: headers.indexOf("Quarters"),
-    month: headers.indexOf("Month"),
-    agent: headers.indexOf("Sales Agent"),
-    shift: headers.indexOf("Shift"),
-    sok: headers.indexOf("SOK Count"),
-    reserved: headers.indexOf("Reserved Count"),
-    calls: headers.indexOf("Total Calls"),
-    talk: headers.indexOf("Total Talktime"),
-    profit: headers.indexOf("Estimated SOK Profit")
+function populateMonths() {
+  const monthIndex = headers.indexOf("Month");
+  const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthPairs = Array.from(new Set(allData.map(row=>{
+    const raw=row[monthIndex]; if(!raw) return null;
+    let dateObj;
+    if(!isNaN(Date.parse(raw))) dateObj=new Date(raw);
+    else {
+      const parts=raw.split(/[-\\/]/);
+      if(parts.length>=3){
+        const day=parseInt(parts[0],10);
+        const monthIdx=isNaN(parts[1])?monthNames.findIndex(n=>n.toLowerCase()===parts[1].slice(0,3).toLowerCase()):parseInt(parts[1],10)-1;
+        const year=parseInt(parts[2],10);
+        dateObj=new Date(year,monthIdx,day);
+      }
+    }
+    if(dateObj&&!isNaN(dateObj)){
+      const formatted=monthNames[dateObj.getMonth()]+'-'+dateObj.getFullYear().toString().slice(2);
+      return JSON.stringify({raw:raw,formatted:formatted});
+    }
+    return null;
+  }).filter(Boolean)));
+
+  const uniquePairs=monthPairs.map(str=>JSON.parse(str));
+  monthDropdown.innerHTML=`<option value="ALL">All Months</option>`+
+    uniquePairs.map(p=>`<option value="${p.raw}">${p.formatted}</option>`).join('');
+  monthDropdown.addEventListener("change", e=>displayData(e.target.value));
+}
+
+function displayData(month){
+  currentMonth=month;
+  const i={
+    month:headers.indexOf("Month"),
+    agent:headers.indexOf("Sales Agent"),
+    shift:headers.indexOf("Shift"),
+    sok:headers.indexOf("SOK Count"),
+    reserved:headers.indexOf("Reserved Count"),
+    calls:headers.indexOf("Total Calls"),
+    talk:headers.indexOf("Total Talktime"),
+    profit:headers.indexOf("Estimated SOK Profit")
   };
-  let rows = allData;
-  if (currentMonthKey) {
-    rows = rows.filter(r => { const d = parseMonthValue(r[idx.month]); return d && yyyymm(d) === currentMonthKey; });
-  }
-  if (currentQuarter && currentQuarter !== "ALL_Q") {
-    rows = rows.filter(r => r[idx.quarter] === currentQuarter);
-  }
-  const grouped = { morning: {}, night: {} };
-  const top = {};
-  rows.forEach(r => {
-    const agent = r[idx.agent];
-    const shift = (r[idx.shift] || "").toLowerCase().includes("morning") ? "morning" : "night";
-    const sok = +r[idx.sok] || 0, reserved = +r[idx.reserved] || 0, calls = +r[idx.calls] || 0, profit = +r[idx.profit] || 0;
-    let talk = 0; if (r[idx.talk]) { const t = r[idx.talk].split(":").map(Number); talk = t.length===3?(t[0]*3600+t[1]*60+t[2]):(t[0]*60+t[1]); }
-    if (!grouped[shift][agent]) grouped[shift][agent] = { agent, sokTotal:0, reservedTotal:0, callsTotal:0, talkTotal:0, profitTotal:0 };
-    grouped[shift][agent].sokTotal += sok;
-    grouped[shift][agent].reservedTotal += reserved;
-    grouped[shift][agent].callsTotal += calls;
-    grouped[shift][agent].talkTotal += talk;
-    grouped[shift][agent].profitTotal += profit;
-    if (!top[agent]) top[agent] = { sokTotal:0, callsTotal:0, profitTotal:0 };
-    top[agent].sokTotal += sok; top[agent].callsTotal += calls; top[agent].profitTotal += profit;
+
+  const data = month==="ALL"?allData:allData.filter(r=>r[i.month]===month);
+  const grouped={morning:{},night:{}};
+  const topData={};
+
+  data.forEach(r=>{
+    const agent=r[i.agent], shiftRaw=(r[i.shift]||"").toLowerCase();
+    const shift=shiftRaw.includes("morning")?"morning":"night";
+    const sok=+r[i.sok]||0, reserved=+r[i.reserved]||0, calls=+r[i.calls]||0, profit=+r[i.profit]||0;
+    let talk=0;
+    const talkRaw=(r[i.talk]||"").toString();
+    if(talkRaw.includes(":")){
+      const t=talkRaw.split(":").map(Number);
+      talk=t.length===3?t[0]*3600+t[1]*60+t[2]:t[0]*60+t[1];
+    } else talk=+talkRaw||0;
+
+    if(!grouped[shift][agent]) grouped[shift][agent]={agent,sokTotal:0,reservedTotal:0,callsTotal:0,talkTotal:0,profitTotal:0};
+    const g=grouped[shift][agent];
+    g.sokTotal+=sok; g.reservedTotal+=reserved; g.callsTotal+=calls; g.talkTotal+=talk; g.profitTotal+=profit;
+
+    if(!topData[agent]) topData[agent]={sokTotal:0,callsTotal:0,profitTotal:0};
+    topData[agent].sokTotal+=sok; topData[agent].callsTotal+=calls; topData[agent].profitTotal+=profit;
   });
-  renderShift(Object.values(grouped.morning), document.getElementById('morningTable'));
-  renderShift(Object.values(grouped.night), document.getElementById('nightTable'));
-  renderTop(top);
+
+  renderShift(Object.values(grouped.morning), morningDiv);
+  renderShift(Object.values(grouped.night), nightDiv);
+  renderTopBoxes(topData);
 }
 
-function renderShift(data, container) {
-  const totals = { sokTotal:0, reservedTotal:0, callsTotal:0, talkTotal:0, profitTotal:0 };
-  data.forEach(d => { for (let k in totals) totals[k] += d[k]; });
-  data.push({ agent: "Grand Total", ...totals });
-  const headersRow = ["Sales Agent","SOK Count","Reserved Count","Total Calls","Total Talktime","Estimated SOK Profit"];
-  let html = "<table><thead><tr>" + headersRow.map(h=>`<th>${h}</th>`).join('') + "</tr></thead><tbody>";
-  data.forEach(d => {
-    html += `<tr>
-      <td>${d.agent}</td>
-      <td>${d.sokTotal}</td>
-      <td>${d.reservedTotal}</td>
-      <td>${d.callsTotal}</td>
-      <td>${formatTime(d.talkTotal)}</td>
-      <td>¥${Math.round(d.profitTotal)}</td>
+function renderShift(data, container){
+  const total={sokTotal:0,reservedTotal:0,callsTotal:0,talkTotal:0,profitTotal:0};
+  data.forEach(d=>{for(let k in total) total[k]+=d[k];});
+  data.push({agent:"Grand Total",...total});
+
+  const headersRow=["Sales Agent","SOK Count","Reserved Count","Total Calls","Total Talktime","Estimated SOK Profit"];
+  let html="<table><thead><tr>"+headersRow.map(h=>`<th>${h}</th>`).join('')+"</tr></thead><tbody>";
+  data.forEach(d=>{
+    html+=`<tr>
+      <td data-value="${d.agent}">${d.agent}</td>
+      <td data-value="${d.sokTotal}">${d.sokTotal}</td>
+      <td data-value="${d.reservedTotal}">${d.reservedTotal}</td>
+      <td data-value="${d.callsTotal}">${d.callsTotal}</td>
+      <td data-value="${d.talkTotal}">${formatTime(d.talkTotal)}</td>
+      <td data-value="${Math.round(d.profitTotal)}">¥${Math.round(d.profitTotal)}</td>
     </tr>`;
   });
-  html += "</tbody></table>";
-  container.innerHTML = html;
+  html+="</tbody></table>";
+  container.innerHTML=html;
+  enableSorting(container);
 }
 
-function renderTop(agg) {
-  function boxHtml(title, key) {
-    const top3 = Object.entries(agg)
-      .map(([agent, v]) => ({ agent, value: v[key] || 0 }))
-      .sort((a,b) => b.value - a.value)
-      .slice(0, 3);
-    return `<div class="title">${title}</div>` +
-           top3.map(t => `<div class="agent">${t.agent}: ${Math.round(t.value)}</div>`).join("");
+function renderTopBoxes(data){
+  function buildBox(title,key){
+    const sorted=Object.entries(data).map(([agent,v])=>({agent,value:v[key]||0})).sort((a,b)=>b.value-a.value).slice(0,3);
+    return `<div><div class="title">${title}</div>`+sorted.map(t=>`<div class="agent">${t.agent}: ${Math.round(t.value)}</div>`).join("")+`</div>`;
   }
-  document.getElementById('topSok').innerHTML = boxHtml("Highest SOK - Top3","sokTotal");
-  document.getElementById('topProfit').innerHTML = boxHtml("Highest Profit - Top3","profitTotal");
-  document.getElementById('topCalls').innerHTML = boxHtml("Highest Calls - Top3","callsTotal");
+  topSok.innerHTML=buildBox("Highest SOK - Top3","sokTotal");
+  topProfit.innerHTML=buildBox("Highest Profit - Top3","profitTotal");
+  topCalls.innerHTML=buildBox("Highest Calls - Top3","callsTotal");
 }
 
-function formatTime(sec) {
-  if (isNaN(sec) || sec <= 0) return "00:00";
-  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
-  return [h,m,s].map(v=>String(v).padStart(2,"0")).join(":");
+function enableSorting(container){
+  const table=container.querySelector("table");
+  if(!table) return;
+  const tbody=table.querySelector("tbody");
+  const headers=table.querySelectorAll("th");
+  headers.forEach((th,idx)=>{
+    let asc=true;
+    th.onclick=()=>{
+      const rows=Array.from(tbody.querySelectorAll("tr"));
+      const totalRow=rows.pop();
+      rows.sort((a,b)=>{
+        const aVal=a.cells[idx].dataset.value||a.cells[idx].innerText;
+        const bVal=b.cells[idx].dataset.value||b.cells[idx].innerText;
+        const aNum=parseFloat(aVal.replace(/[^0-9.-]/g,""));
+        const bNum=parseFloat(bVal.replace(/[^0-9.-]/g,""));
+        if(!isNaN(aNum)&&!isNaN(bNum)) return asc?aNum-bNum:bNum-aNum;
+        else return asc?aVal.localeCompare(bVal):bVal.localeCompare(aVal);
+      });
+      tbody.innerHTML="";
+      rows.forEach(r=>tbody.appendChild(r));
+      tbody.appendChild(totalRow);
+      asc=!asc;
+    }
+  });
 }
+
+function formatTime(sec){
+  if(!sec) return "00:00";
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  return h?`${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`:`${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
+}
+
+loadData();
+setInterval(loadData,5*60*1000);
 </script>
 </body>
 </html>
