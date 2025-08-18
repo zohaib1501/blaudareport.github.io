@@ -59,25 +59,22 @@
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.9);
     position: relative;
     overflow: hidden;
-    animation: pop 2s infinite alternate;
   }
 
-  .metric-box:nth-child(2) {
-    animation-delay: 0.3s;
+  /* text zoom instead of box zoom */
+  .metric-box .title,
+  .metric-box .agent {
+    animation: textZoom 2s infinite alternate;
   }
 
-  .metric-box:nth-child(3) {
-    animation-delay: 0.6s;
-  }
-
-  @keyframes pop {
-    0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
-    50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(0, 240, 255, 1); }
-    100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 240, 255, 0.7); }
+  @keyframes textZoom {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.1); }
+    100% { transform: scale(1); }
   }
 
   .metric-box .title {
-    font-size: 16px;
+    font-size: 17px;  /* +1pt */
     font-weight: bold;
     text-shadow: 0 0 3px #00f0ff, 0 0 6px #00f0ff;
     margin-bottom: 6px;
@@ -85,7 +82,7 @@
   }
 
   .metric-box .agent {
-    font-size: 14px;
+    font-size: 15px;  /* +1pt */
     margin: 3px 0;
     text-shadow: 0 0 2px #ffffff, 0 0 4px #00bfff;
   }
@@ -157,29 +154,63 @@
   tbody tr:hover {
     background-color: #99e6ff;
   }
+
+  /* login screen */
+  #loginScreen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #e0f7ff;
+  }
+
+  #dashboard {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .error {
+    color: red;
+    margin-top: 6px;
+    font-size: 12px;
+  }
 </style>
 </head>
 <body>
-<h2>Agent Dashboard - Compact View</h2>
-<div id="lastUpdated"></div>
-<div style="text-align:center;">
-  <select id="monthDropdown"></select>
+<!-- Login Screen -->
+<div id="loginScreen">
+  <h2>Enter Password</h2>
+  <input type="password" id="passwordInput" placeholder="Password">
+  <label><input type="checkbox" id="showPassword"> Show Password</label>
+  <div class="error" id="errorMsg"></div>
 </div>
 
-<div class="top-row">
-  <div id="topSok" class="metric-box"></div>
-  <div id="topProfit" class="metric-box"></div>
-  <div id="topCalls" class="metric-box"></div>
-</div>
-
-<div class="shift-container">
-  <div class="shift-table">
-    <h3>Morning Shift</h3>
-    <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
+<!-- Dashboard -->
+<div id="dashboard">
+  <h2>Agent Dashboard - Compact View</h2>
+  <div id="lastUpdated"></div>
+  <div style="text-align:center;">
+    <select id="monthDropdown"></select>
+    <select id="quarterDropdown"></select>
   </div>
-  <div class="shift-table">
-    <h3>Night Shift</h3>
-    <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
+
+  <div class="top-row">
+    <div id="topSok" class="metric-box"></div>
+    <div id="topProfit" class="metric-box"></div>
+    <div id="topCalls" class="metric-box"></div>
+  </div>
+
+  <div class="shift-container">
+    <div class="shift-table">
+      <h3>Morning Shift</h3>
+      <div id="morningTable" style="flex:1 1 auto; overflow:auto;"></div>
+    </div>
+    <div class="shift-table">
+      <h3>Night Shift</h3>
+      <div id="nightTable" style="flex:1 1 auto; overflow:auto;"></div>
+    </div>
   </div>
 </div>
 
@@ -187,6 +218,7 @@
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyYD7X2tEKE1YJZU8pEF1KNtW43dMh0Kg-kRr1NV7u5mJZnSBZq_7p6OBCb3X322z10ReriXHngSRq/pub?gid=1105455398&single=true&output=csv";
 
 const monthDropdown = document.getElementById('monthDropdown');
+const quarterDropdown = document.getElementById('quarterDropdown');
 const topSok = document.getElementById('topSok');
 const topProfit = document.getElementById('topProfit');
 const topCalls = document.getElementById('topCalls');
@@ -194,8 +226,35 @@ const morningDiv = document.getElementById('morningTable');
 const nightDiv = document.getElementById('nightTable');
 const lastUpdated = document.getElementById('lastUpdated');
 
-let allData = [], headers = [], currentMonth = "ALL";
+let allData = [], headers = [], currentMonth = "ALL", currentQuarter = "ALL";
 
+/* -------- LOGIN -------- */
+const loginScreen = document.getElementById("loginScreen");
+const dashboard = document.getElementById("dashboard");
+const passwordInput = document.getElementById("passwordInput");
+const errorMsg = document.getElementById("errorMsg");
+const showPassword = document.getElementById("showPassword");
+
+showPassword.addEventListener("change", () => {
+  passwordInput.type = showPassword.checked ? "text" : "password";
+});
+
+passwordInput.addEventListener("keypress", (e)=>{
+  if(e.key==="Enter") validatePassword();
+});
+
+function validatePassword(){
+  if(passwordInput.value==="blauda123"){
+    loginScreen.style.display="none";
+    dashboard.style.display="flex";
+    loadData();
+    setInterval(loadData,5*60*1000);
+  } else {
+    errorMsg.textContent="Incorrect password!";
+  }
+}
+
+/* -------- DATA LOADING -------- */
 async function loadData() {
   const response = await fetch(CSV_URL);
   const text = await response.text();
@@ -207,8 +266,8 @@ function processCSV(text) {
   const lines = text.trim().split('\n').map(parseCSVLine);
   headers = lines[0].map(h => h ? h.trim() : "");
   allData = lines.slice(1);
-  populateMonths();
-  displayData(currentMonth);
+  populateFilters();
+  displayData();
 }
 
 function parseCSVLine(line) {
@@ -225,8 +284,12 @@ function parseCSVLine(line) {
   return result;
 }
 
-function populateMonths() {
+/* -------- FILTERS -------- */
+function populateFilters(){
   const monthIndex = headers.indexOf("Month");
+  const quarterIndex = headers.indexOf("Quarters");
+
+  // months
   const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const monthPairs = Array.from(new Set(allData.map(row=>{
     const raw=row[monthIndex]; if(!raw) return null;
@@ -243,20 +306,46 @@ function populateMonths() {
     }
     if(dateObj&&!isNaN(dateObj)){
       const formatted=monthNames[dateObj.getMonth()]+'-'+dateObj.getFullYear().toString().slice(2);
-      return JSON.stringify({raw:raw,formatted:formatted});
+      return JSON.stringify({raw:raw,formatted:formatted,dateObj:dateObj});
     }
     return null;
   }).filter(Boolean)));
 
   const uniquePairs=monthPairs.map(str=>JSON.parse(str));
+  uniquePairs.sort((a,b)=>a.dateObj-b.dateObj);
+
   monthDropdown.innerHTML=`<option value="ALL">All Months</option>`+
     uniquePairs.map(p=>`<option value="${p.raw}">${p.formatted}</option>`).join('');
-  monthDropdown.addEventListener("change", e=>displayData(e.target.value));
+
+  // select latest month by default
+  const latest=uniquePairs[uniquePairs.length-1];
+  if(latest){
+    currentMonth=latest.raw;
+    monthDropdown.value=latest.raw;
+  }
+
+  monthDropdown.onchange=(e)=>{
+    currentMonth=e.target.value;
+    if(currentMonth!=="ALL") { quarterDropdown.value=""; currentQuarter=""; }
+    displayData();
+  };
+
+  // quarters
+  const quarters=Array.from(new Set(allData.map(r=>r[quarterIndex]).filter(Boolean)));
+  quarterDropdown.innerHTML=`<option value="ALL">All Quarters</option>`+
+    quarters.map(q=>`<option value="${q}">${q}</option>`).join('');
+
+  quarterDropdown.onchange=(e)=>{
+    currentQuarter=e.target.value;
+    if(currentQuarter!=="ALL") { monthDropdown.value=""; currentMonth=""; }
+    displayData();
+  };
 }
 
-function displayData(month){
-  currentMonth=month;
+/* -------- DISPLAY DATA -------- */
+function displayData(){
   const i={
+    quarter:headers.indexOf("Quarters"),
     month:headers.indexOf("Month"),
     agent:headers.indexOf("Sales Agent"),
     shift:headers.indexOf("Shift"),
@@ -267,7 +356,10 @@ function displayData(month){
     profit:headers.indexOf("Estimated SOK Profit")
   };
 
-  const data = month==="ALL"?allData:allData.filter(r=>r[i.month]===month);
+  let data=allData;
+  if(currentMonth && currentMonth!=="ALL") data=data.filter(r=>r[i.month]===currentMonth);
+  else if(currentQuarter && currentQuarter!=="ALL") data=data.filter(r=>r[i.quarter]===currentQuarter);
+
   const grouped={morning:{},night:{}};
   const topData={};
 
@@ -358,9 +450,6 @@ function formatTime(sec){
   const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
   return h?`${h.toString().padStart(2,"0")}:${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`:`${m.toString().padStart(2,"0")}:${s.toString().padStart(2,"0")}`;
 }
-
-loadData();
-setInterval(loadData,5*60*1000);
 </script>
 </body>
 </html>
